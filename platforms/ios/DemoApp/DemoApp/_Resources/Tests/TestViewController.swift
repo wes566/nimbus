@@ -15,7 +15,6 @@ class TestViewController: UIViewController, WKScriptMessageHandler, WKNavigation
     override func viewDidLoad() {
         super.viewDidLoad()
     
-        bridge = DemoAppBridge(host: self)
         let statusLabel = UILabel()
         self.view.addSubview(statusLabel)
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -42,6 +41,8 @@ class TestViewController: UIViewController, WKScriptMessageHandler, WKNavigation
         let config = WKWebViewConfiguration()
         config.userContentController = userContentController
         let webView = WKWebView(frame: CGRect.zero, configuration: config)
+    
+        bridge = DemoAppBridge(host: self, webView: webView)
         
         // Connect the webview to our demo bridge
         let c = webView.addConnection(to: bridge!, as: "DemoAppBridge")

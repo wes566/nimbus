@@ -17,8 +17,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        bridge = DemoAppBridge(host: self)
-
         let userContentController = WKUserContentController()
         let appScript = Bundle.main.url(forResource: "app", withExtension: "js")
             .flatMap { try? NSString(contentsOf: $0, encoding: String.Encoding.utf8.rawValue ) }
@@ -30,11 +28,14 @@ class ViewController: UIViewController {
         config.userContentController = userContentController
         let webView = WKWebView(frame: view.bounds, configuration: config)
 
+        bridge = DemoAppBridge(host: self, webView: webView)
+        
         // Connect the webview to our demo bridge
         let c = webView.addConnection(to: bridge!, as: "DemoAppBridge")
         c.bind(DemoAppBridge.showAlert, as: "showAlert")
         c.bind(DemoAppBridge.currentTime, as: "currentTime")
         c.bind(DemoAppBridge.withCallback, as: "withCallback")
+        c.bind(DemoAppBridge.initiateNativeCallingJs, as: "initiateNativeCallingJs")
 
         self.view.addSubview(webView)
         webView.loadHTMLString(htmlString, baseURL: nil)
@@ -52,6 +53,7 @@ let htmlString = """
   <button onclick='showAlert();'>Show Alert</button><br>
   <button onclick='logCurrentTime();'>Log Time</button><br>
   <button onclick='doCallback();'>Do Callback</button><br>
+  <button onclick='initiateNativeCallingJs();'>Tell native code to call js</button></br>
 </body>
 </html>
 """

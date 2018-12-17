@@ -13,7 +13,7 @@ import Foundation
  Once `JSONEncoder` supports encoding top-level fragments this can
  be removed.
  */
-enum EncodableReturnType: Encodable {
+public enum EncodableValue: Encodable {
     case void
     case value(Encodable)
 
@@ -21,7 +21,7 @@ enum EncodableReturnType: Encodable {
         case v
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: Keys.self)
         switch self {
         case .void:

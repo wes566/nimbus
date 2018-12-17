@@ -121,7 +121,7 @@ public class Connection<C> {
         case is Void:
             resultString = "undefined"
             break
-        case let v as EncodableReturnType:
+        case let v as EncodableValue:
             resultString = try! String(data: JSONEncoder().encode(v), encoding: .utf8)!
             break
         default:
@@ -149,7 +149,7 @@ extension Connection {
      */
     public func bind<R: Encodable>(_ function: @escaping (C) -> () -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { () -> EncodableReturnType in
+        let wrappedFunction = { () -> EncodableValue in
             let r = boundFunction()
             return .value(r)
         }
@@ -162,7 +162,7 @@ extension Connection {
      */
     public func bind(_ function: @escaping (C) -> () -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { () -> EncodableReturnType in
+        let wrappedFunction = { () -> EncodableValue in
             boundFunction()
             return .void
         }
@@ -175,7 +175,7 @@ extension Connection {
      */
     public func bind<R: Encodable, A0>(_ function: @escaping (C) -> (A0) -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0) -> EncodableValue in
             let r = boundFunction(a0)
             return .value(r)
         }
@@ -188,7 +188,7 @@ extension Connection {
      */
     public func bind<A0>(_ function: @escaping (C) -> (A0) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0) -> EncodableValue in
             boundFunction(a0)
             return .void
         }
@@ -201,7 +201,7 @@ extension Connection {
      */
     public func bind<CB0: Encodable>(_ function: @escaping (C) -> ((CB0) -> ()) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (c: Callable) -> EncodableReturnType in
+        let wrappedFunction = { (c: Callable) -> EncodableValue in
             boundFunction() { cb0 in
                 _ = try! c.call(args: [cb0])
             }
@@ -216,7 +216,7 @@ extension Connection {
      */
     public func bind<R: Encodable, A0, A1>(_ function: @escaping (C) -> (A0, A1) -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1) -> EncodableValue in
             let r = boundFunction(a0, a1)
             return .value(r)
         }
@@ -229,7 +229,7 @@ extension Connection {
      */
     public func bind<A0, A1>(_ function: @escaping (C) -> (A0, A1) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1) -> EncodableValue in
             boundFunction(a0, a1)
             return .void
         }
@@ -242,7 +242,7 @@ extension Connection {
      */
     public func bind<A0, CB0: Encodable>(_ function: @escaping (C) -> (A0, @escaping (CB0) -> ()) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, c: Callable) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, c: Callable) -> EncodableValue in
             boundFunction(a0) { cb0 in
                 _ = try! c.call(args: [cb0])
             }
@@ -257,7 +257,7 @@ extension Connection {
      */
     public func bind<R: Encodable, A0, A1, A2>(_ function: @escaping (C) -> (A0, A1, A2) -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2) -> EncodableValue in
             let r = boundFunction(a0, a1, a2)
             return .value(r)
         }
@@ -270,7 +270,7 @@ extension Connection {
      */
     public func bind<A0, A1, A2>(_ function: @escaping (C) -> (A0, A1, A2) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2) -> EncodableValue in
             boundFunction(a0, a1, a2)
             return .void
         }
@@ -283,7 +283,7 @@ extension Connection {
      */
     public func bind<A0, A1, CB0: Encodable>(_ function: @escaping (C) -> (A0, A1, @escaping (CB0) -> ()) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, c: Callable) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, c: Callable) -> EncodableValue in
             boundFunction(a0, a1) { cb0 in
                 _ = try! c.call(args: [cb0])
             }
@@ -298,7 +298,7 @@ extension Connection {
      */
     public func bind<R: Encodable, A0, A1, A2, A3>(_ function: @escaping (C) -> (A0, A1, A2, A3) -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3) -> EncodableValue in
             let r = boundFunction(a0, a1, a2, a3)
             return .value(r)
         }
@@ -311,7 +311,7 @@ extension Connection {
      */
     public func bind<A0, A1, A2, A3>(_ function: @escaping (C) -> (A0, A1, A2, A3) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3) -> EncodableValue in
             boundFunction(a0, a1, a2, a3)
             return .void
         }
@@ -324,7 +324,7 @@ extension Connection {
      */
     public func bind<A0, A1, A2, CB0: Encodable>(_ function: @escaping (C) -> (A0, A1, A2, @escaping (CB0) -> ()) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, c: Callable) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, c: Callable) -> EncodableValue in
             boundFunction(a0, a1, a2) { cb0 in
                 _ = try! c.call(args: [cb0])
             }
@@ -339,7 +339,7 @@ extension Connection {
      */
     public func bind<R: Encodable, A0, A1, A2, A3, A4>(_ function: @escaping (C) -> (A0, A1, A2, A3, A4) -> R, as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, a4: A4) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, a4: A4) -> EncodableValue in
             let r = boundFunction(a0, a1, a2, a3, a4)
             return .value(r)
         }
@@ -352,7 +352,7 @@ extension Connection {
      */
     public func bind<A0, A1, A2, A3, A4>(_ function: @escaping (C) -> (A0, A1, A2, A3, A4) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, a4: A4) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, a4: A4) -> EncodableValue in
             boundFunction(a0, a1, a2, a3, a4)
             return .void
         }
@@ -365,7 +365,7 @@ extension Connection {
      */
     public func bind<A0, A1, A2, A3, CB0: Encodable>(_ function: @escaping (C) -> (A0, A1, A2, A3, @escaping (CB0) -> ()) -> (), as name: String) {
         let boundFunction = function(target)
-        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, c: Callable) -> EncodableReturnType in
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, c: Callable) -> EncodableValue in
             boundFunction(a0, a1, a2, a3) { cb0 in
                 _ = try! c.call(args: [cb0])
             }
