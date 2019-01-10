@@ -1,0 +1,22 @@
+{
+  "name": "nimbus",
+  "version": "0.1.0",
+  "description": "Nimbus is a bridge for hybrid app development.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run compile && npm run bundle",
+    "bundle": "rollup dist/index.js --file dist/nimbus.js --name nimbus --format iife",
+    "compile": "tsc -p ./",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.soma.salesforce.com:MobilePlatform/Nimbus.git"
+  },
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "rollup": "^1.1.2",
+    "typescript": "^3.3.3"
+  }
+}

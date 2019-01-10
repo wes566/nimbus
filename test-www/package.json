@@ -1,0 +1,29 @@
+{
+  "name": "test-www",
+  "version": "1.0.0",
+  "license": "BSD-3-Clause",
+  "description": "",
+  "browser": "dist/bundle.js",
+  "scripts": {
+    "build": "npm run compile && npm run bundle",
+    "bundle": "cross-env rollup -c ./rollup.config.js",
+    "compile": "tsc -p ./",
+    "preinstall": "pushd .. && npm run build && popd",
+    "serve": "cross-env rollup -c ./rollup.config.js --watch"
+  },
+  "dependencies": {
+    "nimbus": "file:../"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "cross-env": "^5.2.0",
+    "fs-extra": "^7.0.1",
+    "mocha": "^6.0.0-1",
+    "rollup": "^1.1.2",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-serve": "^0.6.0",
+    "typescript": "^3.3.3"
+  }
+}
