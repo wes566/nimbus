@@ -5,8 +5,8 @@
 
 
 import UIKit
-import WebKit
 import Veil
+import WebKit
 
 class DemoAppBridge {
 
