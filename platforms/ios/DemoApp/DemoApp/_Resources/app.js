@@ -18,3 +18,19 @@ function doCallback() {
                                console.log(`callback got ${v}`);
                                });
 }
+
+function initiateNativeCallingJs() {
+    DemoAppBridge.initiateNativeCallingJs();
+}
+
+function demoMethodForNativeToJs(boolParam, intParam, optionalIntParam, stringParam, userDefinedTypeParam) {
+    const boolParamFormatted = boolParam.toString();
+    const intParamFormatted = intParam.toString();
+    var optionalIntParamFormatted = "null";
+    if (optionalIntParam != null) {
+        optionalIntParamFormatted = optionalIntParam.toString();
+    }
+    const userDefinedTypeParamFormatted = userDefinedTypeParam.toString();
+    console.log(boolParamFormatted, intParamFormatted, optionalIntParamFormatted, stringParam, userDefinedTypeParamFormatted);
+    return boolParamFormatted + ', ' + intParamFormatted + ', ' + optionalIntParamFormatted + ', ' + stringParam + ', ' + userDefinedTypeParamFormatted;
+}

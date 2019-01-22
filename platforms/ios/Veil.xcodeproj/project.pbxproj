@@ -10,7 +10,7 @@
 		2903C96F2142FC6900057625 /* WebView+Veil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2903C96E2142FC6900057625 /* WebView+Veil.swift */; };
 		2903C9712142FD3700057625 /* WebViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2903C9702142FD3700057625 /* WebViewTests.swift */; };
 		2903C9732142FEEC00057625 /* veil.js in Resources */ = {isa = PBXBuildFile; fileRef = 2903C9722142FEEC00057625 /* veil.js */; };
-		290B74772146DDE0000DAF3B /* EncodableReturnValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290B74762146DDE0000DAF3B /* EncodableReturnValue.swift */; };
+		290B74772146DDE0000DAF3B /* EncodableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290B74762146DDE0000DAF3B /* EncodableValue.swift */; };
 		290B74792147129D000DAF3B /* Callback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290B74782147129D000DAF3B /* Callback.swift */; };
 		29D5BBB5214032A000BFCF4E /* Veil.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29D5BBAB214032A000BFCF4E /* Veil.framework */; };
 		29D5BBBC214032A000BFCF4E /* Veil.h in Headers */ = {isa = PBXBuildFile; fileRef = 29D5BBAE214032A000BFCF4E /* Veil.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -18,6 +18,8 @@
 		29D5BC0D214037E800BFCF4E /* CallableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D5BC0C214037E800BFCF4E /* CallableTests.swift */; };
 		29D5BC0F21403DC500BFCF4E /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D5BC0E21403DC500BFCF4E /* Connection.swift */; };
 		29D5BC112140411800BFCF4E /* ConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29D5BC102140411800BFCF4E /* ConnectionTests.swift */; };
+		68C9DE6F21C7192B00A1377A /* evalJs.js in Resources */ = {isa = PBXBuildFile; fileRef = 68C9DE6E21C7192B00A1377A /* evalJs.js */; };
+		68C9DE7121C7196600A1377A /* EvalJsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C9DE7021C7196600A1377A /* EvalJsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +36,7 @@
 		2903C96E2142FC6900057625 /* WebView+Veil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebView+Veil.swift"; sourceTree = "<group>"; };
 		2903C9702142FD3700057625 /* WebViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewTests.swift; sourceTree = "<group>"; };
 		2903C9722142FEEC00057625 /* veil.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = veil.js; sourceTree = "<group>"; };
-		290B74762146DDE0000DAF3B /* EncodableReturnValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncodableReturnValue.swift; sourceTree = "<group>"; };
+		290B74762146DDE0000DAF3B /* EncodableValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncodableValue.swift; sourceTree = "<group>"; };
 		290B74782147129D000DAF3B /* Callback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Callback.swift; sourceTree = "<group>"; };
 		29D5BBAB214032A000BFCF4E /* Veil.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Veil.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		29D5BBAE214032A000BFCF4E /* Veil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Veil.h; sourceTree = "<group>"; };
@@ -45,6 +47,8 @@
 		29D5BC0C214037E800BFCF4E /* CallableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallableTests.swift; sourceTree = "<group>"; };
 		29D5BC0E21403DC500BFCF4E /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
 		29D5BC102140411800BFCF4E /* ConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionTests.swift; sourceTree = "<group>"; };
+		68C9DE6E21C7192B00A1377A /* evalJs.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = evalJs.js; sourceTree = "<group>"; };
+		68C9DE7021C7196600A1377A /* EvalJsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvalJsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,7 +95,7 @@
 				29D5BC0A214037BF00BFCF4E /* Callable.swift */,
 				290B74782147129D000DAF3B /* Callback.swift */,
 				29D5BC0E21403DC500BFCF4E /* Connection.swift */,
-				290B74762146DDE0000DAF3B /* EncodableReturnValue.swift */,
+				290B74762146DDE0000DAF3B /* EncodableValue.swift */,
 				2903C96E2142FC6900057625 /* WebView+Veil.swift */,
 			);
 			path = Veil;
@@ -104,6 +108,7 @@
 				29D5BC0C214037E800BFCF4E /* CallableTests.swift */,
 				29D5BC102140411800BFCF4E /* ConnectionTests.swift */,
 				2903C9702142FD3700057625 /* WebViewTests.swift */,
+				68C9DE7021C7196600A1377A /* EvalJsTests.swift */,
 			);
 			path = VeilTests;
 			sourceTree = "<group>";
@@ -122,6 +127,7 @@
 			isa = PBXGroup;
 			children = (
 				29D5BBBB214032A000BFCF4E /* Info.plist */,
+				68C9DE6E21C7192B00A1377A /* evalJs.js */,
 			);
 			path = _Resources;
 			sourceTree = "<group>";
@@ -227,6 +233,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68C9DE6F21C7192B00A1377A /* evalJs.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,7 +248,7 @@
 				2903C96F2142FC6900057625 /* WebView+Veil.swift in Sources */,
 				29D5BC0B214037BF00BFCF4E /* Callable.swift in Sources */,
 				29D5BC0F21403DC500BFCF4E /* Connection.swift in Sources */,
-				290B74772146DDE0000DAF3B /* EncodableReturnValue.swift in Sources */,
+				290B74772146DDE0000DAF3B /* EncodableValue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +256,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68C9DE7121C7196600A1377A /* EvalJsTests.swift in Sources */,
 				29D5BC0D214037E800BFCF4E /* CallableTests.swift in Sources */,
 				2903C9712142FD3700057625 /* WebViewTests.swift in Sources */,
 				29D5BC112140411800BFCF4E /* ConnectionTests.swift in Sources */,

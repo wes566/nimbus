@@ -5,11 +5,14 @@
 
 
 import UIKit
+import Veil
+import WebKit
 
 class DemoAppBridge {
 
-    init(host: UIViewController) {
+    init(host: UIViewController, webView: WKWebView) {
         self.host = host
+        self.webView = webView
     }
 
     func showAlert(message: String) {
@@ -37,5 +40,22 @@ class DemoAppBridge {
         callback("hello from swift")
     }
 
+    func initiateNativeCallingJs() {
+        let boolParam = true
+        let intParam = 999
+        let optionalIntParam:Int? = nil
+        let stringParam = "hello swift"
+        let userDefinedTypeParam = UserDefinedType()
+        self.webView?.callJavascript(name: "demoMethodForNativeToJs", args: [boolParam, intParam, optionalIntParam, stringParam, userDefinedTypeParam]){ (result, error) -> () in
+            print(result!)
+        };
+    }
+    
     weak var host: UIViewController?
+    weak var webView: WKWebView?
+}
+
+class UserDefinedType:Encodable {
+    var intParam = 5
+    var stringParam = "hello user defined type"
 }
