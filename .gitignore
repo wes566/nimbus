@@ -365,6 +365,8 @@ playground.xcworkspace
 #
 # Add this line if you want to avoid checking in source code from the Xcode workspace
 # *.xcworkspace
+platforms/ios/Pods
+platforms/ios/DerivedData
 
 # Carthage
 #
@@ -397,6 +399,5 @@ playground.xcworkspace
 !*.xcodeproj/xcshareddata/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
-
 
 # End of https://www.gitignore.io/api/android,androidstudio,intellij,kotlin,objective-c,swift,xcode

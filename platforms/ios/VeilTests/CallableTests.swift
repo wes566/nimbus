@@ -1,10 +1,10 @@
-// Copyright (c) 2018, salesforce.com, inc.
-// All rights reserved.
-// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2018, salesforce.com, inc.    //
+// All rights reserved.    //  Copyright © 2018 Salesforce.com, inc. All rights reserved.
+// SPDX-License-Identifier: BSD-3-Clause    //
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
-
 import XCTest
+import SwiftCheck
 
 @testable import Veil
 
@@ -13,91 +13,92 @@ class CallableTests: XCTestCase {
     let testable = Testable()
 
     func testNullaryCallback() {
-        let c = make_callable(Testable.nullary(testable))
-        let r = try? c.call(args: []) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 0)
+        property("Test nullary") <- {
+            let c = make_callable(Testable.nullary(testable))
+            let r = try? c.call(args: []) as? Int
+            return r == 0
+        }
     }
 
     func testUnaryCallable() {
-        let c = make_callable(Testable.unary(testable))
-        let r = try? c.call(args: [1]) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 1)
+        property("Test unary") <- forAll { (n: Int) in
+            let c = make_callable(Testable.unary(self.testable))
+            let r = try? c.call(args: [n]) as? Int
+            return r == n
+        }
     }
 
     func testBinaryCallable() {
-        let c = make_callable(Testable.binary(testable))
-        let r = try? c.call(args: [1,2]) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 2)
+        property("Test binary") <- forAll { (n0: Int, n1: Int) in
+            let c = make_callable(Testable.binary(self.testable))
+            let r = try? c.call(args: [n0, n1]) as? Int
+            return r == n0 + n1
+        }
     }
 
     func testTernaryCallable() {
-        let c = make_callable(Testable.ternary(testable))
-        let r = try? c.call(args: [1,2,3]) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 3)
+        property("Test ternary") <- forAll { (n0: Int, n1: Int, n2: Int) in
+            let c = make_callable(Testable.ternary(self.testable))
+            let r = try? c.call(args: [n0, n1, n2]) as? Int
+            return r == n0 + n1 + n2
+        }
     }
 
     func testQuaternaryCallable() {
-        let c = make_callable(Testable.quaternary(testable))
-        let r = try? c.call(args: [1,2,3,4]) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 4)
+        property("Test quarternary") <- forAll { (n0: Int, n1: Int, n2: Int, n3: Int) in
+            let c = make_callable(Testable.quaternary(self.testable))
+            let r = try? c.call(args: [n0, n1, n2, n3]) as? Int
+            return r == n0 + n1 + n2 + n3
+        }
     }
 
     func testQuinaryCallable() {
-        let c = make_callable(Testable.quinary(testable))
-        let r = try? c.call(args: [1,2,3,4,5]) as? Int
-        XCTAssertTrue(testable.called)
-        XCTAssertEqual(r, 5)
+        property("Test quinary") <- forAll { (n0: Int, n1: Int, n2: Int, n3: Int, n4: Int) in
+            let c = make_callable(Testable.quinary(self.testable))
+            let r = try? c.call(args: [n0, n1, n2, n3, n4]) as? Int
+            return r == n0 + n1 + n2 + n3 + n4
+        }
     }
 
     func testCallbackable() {
-        let c = make_callable(Testable.callbackable(testable))
-        let x = expectation(description: "called callback")
-
-        let cb: (Int) -> () = { (i: Int) in
-            print("the int is \(i)")
-            x.fulfill()
+        property("Test callback") <- forAll { (n: Int) in
+            let c = make_callable(Testable.callbackable(self.testable))
+            let x = self.expectation(description: "called callback")
+            
+            let cb: (Int) -> () = { (i: Int) in
+                x.fulfill()
+            }
+            _ = try? c.call(args: [n, cb])
+            self.wait(for: [x], timeout: 5)
+            return true
         }
-        let r = try? c.call(args: [1, cb])
-        wait(for: [x], timeout: 5)
     }
 }
 
 class Testable {
-    private(set) var called = false
 
     func nullary() -> Int {
-        called = true
         return 0
     }
 
     func unary(a0: Int) -> Int {
-        called = true
-        return 1
+        return a0
     }
 
     func binary(a0: Int, a1: Int) -> Int {
-        called = true
-        return 2
+        return a0 + a1
     }
 
     func ternary(a0: Int, a1: Int, a2: Int) -> Int {
-        called = true
-        return 3
+        return a0 + a1 + a2
     }
 
     func quaternary(a0: Int, a1: Int, a2: Int, a3: Int) -> Int {
-        called = true
-        return 4
+        return a0 + a1 + a2 + a3
     }
 
     func quinary(a0: Int, a1: Int, a2: Int, a3: Int, a4: Int) -> Int {
-        called = true
-        return 5
+         return a0 + a1 + a2 + a3 + a4
     }
 
     func callbackable(a0: Int, a1: (Int) -> ()) {

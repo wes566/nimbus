@@ -1,8 +1,7 @@
-// Copyright (c) 2018, salesforce.com, inc.
-// All rights reserved.
-// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2018, salesforce.com, inc.    //
+// All rights reserved.    //  Copyright © 2018 Salesforce.com, inc. All rights reserved.
+// SPDX-License-Identifier: BSD-3-Clause    //
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
-
 
 import WebKit
 
@@ -375,4 +374,18 @@ extension Connection {
         bind(callable, as: name)
     }
 
+    /**
+     Bind the specified function to this connection.
+     */
+    public func bind<A0, A1, A2, A3, A4, CB0: Encodable>(_ function: @escaping (C) -> (A0, A1, A2, A3, A4, @escaping (CB0) -> ()) -> (), as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (a0: A0, a1: A1, a2: A2, a3: A3, a4: A4, c: Callable) -> EncodableReturnType in
+            boundFunction(a0, a1, a2, a3, a4) { cb0 in
+                _ = try! c.call(args: [cb0])
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
 }

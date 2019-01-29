@@ -1,11 +1,11 @@
-// Copyright (c) 2018, salesforce.com, inc.
-// All rights reserved.
-// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2018, salesforce.com, inc.    //
+// All rights reserved.    //  Copyright © 2018 Salesforce.com, inc. All rights reserved.
+// SPDX-License-Identifier: BSD-3-Clause    //
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
-
 
 import XCTest
 import WebKit
+import SwiftCheck
 
 @testable import Veil
 
@@ -13,46 +13,56 @@ class ConnectionTestBridge {
 
     private(set) var calledFoo = false
 
-    var callbackExpectation: XCTestExpectation?
-    var callbackResult: Int = 0
-
     func foo() {
         calledFoo = true
     }
 
-    func fulfillCallbackExpectation(result: Int) {
-        callbackResult = result
-        callbackExpectation?.fulfill()
-        callbackExpectation = nil
-    }
-
-    func unaryWithCallback(callback: (Int) -> ()) {
+    func callWithCallback(callback: (Int) -> ()) {
         callback(42)
     }
 
-    func binaryWithCallback(arg0: Int, callback: (Int) -> ()) {
-        callback(arg0 * arg0);
+    func unaryWithCallback(arg0: Int, callback: (Int) -> ()) {
+        callback(arg0)
     }
 
-    func ternaryWithCallback(arg0: Float, arg1: Float, callback: (Float) -> ()) {
-        callback(pow(arg0, arg1))
+    func binaryWithCallback(arg0: Float, arg1: Float, callback: (Float) -> ()) {
+        callback(arg0 + arg1)
     }
 
-    func quaternaryWithCallback(arg0: Int, arg1: Int, arg2: Int, callback: (Int) -> ()) {
-        callback(arg0 * arg1 * arg2)
+    func ternaryWithCallback(arg0: Int, arg1: Int, arg2: Int, callback: (Int) -> ()) {
+        callback(arg0 + arg1 + arg2)
     }
 
-    func quinaryWithCallback(arg0: Int, arg1: Int, arg2: Int, arg3: Int, callback: (Int) -> ()) {
+    func quaternaryWithCallback(arg0: Int, arg1: Int, arg2: Int, arg3: Int, callback: (Int) -> ()) {
         callback(arg0 + arg1 + arg2 + arg3)
+    }
+    
+    func quinaryWithCallback(arg0: Int, arg1: Int, arg2: Int, arg3: Int, arg4: Int, callback: (Int) -> ()) {
+        callback(arg0 + arg1 + arg2 + arg3 + arg4)
     }
 }
 
-class ConnectionTests: XCTestCase, WKNavigationDelegate {
+let lowerCaseLetters : Gen<Character> = Gen<Character>.fromElements(in: "a"..."z")
+let upperCaseLetters : Gen<Character> = Gen<Character>.fromElements(in: "A"..."Z")
 
+let uppersAndLowers = Gen<Character>.one(of: [
+    lowerCaseLetters,
+    upperCaseLetters
+    ])
+
+class ConnectionTests: XCTestCase, WKNavigationDelegate {
     let bridge = ConnectionTestBridge()
     var webView: WKWebView!
 
     var loadingExpectation: XCTestExpectation?
+    
+    func generateJSFunction(fn: String,  values: Int...) -> String {
+        var template = "ConnectionTestBridge." + fn + "("
+        let sum = values.reduce(0) { (sum, value) in sum + value }
+        template = values.reduce(template) { (template, value) in template + "\(value)," }
+        template += "(v) => { return v; }); \(sum);"
+        return String(format: template, fn, values)
+    }
 
     override func setUp() {
         webView = WKWebView()
@@ -75,149 +85,216 @@ class ConnectionTests: XCTestCase, WKNavigationDelegate {
     }
 
     func testCreatingConnectionCreatesNamespace() {
-
         let _ = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
-
         loadWebViewAndWait()
 
-        let x = expectation(description: "js result")
-        var namespaceExists = false
-        webView.evaluateJavaScript("window.webkit.messageHandlers.ConnectionTestBridge !== undefined") { (result, error) in
-            if case let .some(value as Bool) = result {
-                namespaceExists = value
+        property("Test connecting creates namespace", arguments: CheckerArguments(maxAllowableSuccessfulTests: 1)) <- {
+            let x = self.expectation(description: "js result")
+            var namespaceExists = false
+            self.webView?.evaluateJavaScript("window.webkit.messageHandlers.ConnectionTestBridge !== undefined") { (result, error) in
+                if case let .some(value as Bool) = result {
+                    namespaceExists = value
+                }
+                x.fulfill()
             }
-            x.fulfill()
+            self.wait(for: [x], timeout: 5)
+            return namespaceExists
         }
-        wait(for: [x], timeout: 5)
-        XCTAssertTrue(namespaceExists)
     }
 
     func testCreatingConnectionWithBindingCreatesStub() {
-
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.foo, as: "foo")
-
         loadWebViewAndWait()
-
-        let x = expectation(description: "js result")
-        var stubExists = false
-        webView.evaluateJavaScript("ConnectionTestBridge.foo !== undefined") { (result, error) in
-            if case let .some(value as Bool) = result {
-                stubExists = value
+        
+        property("Test connection with bind creating stub", arguments: CheckerArguments(maxAllowableSuccessfulTests: 1)) <- {
+            let callbackExpectation = self.expectation(description: "js result")
+            var stubExists = false
+            self.webView?.evaluateJavaScript("ConnectionTestBridge.foo !== undefined") { (result, error) in
+                if case let .some(value as Bool) = result {
+                    stubExists = value
+                }
+                callbackExpectation.fulfill()
             }
-            x.fulfill()
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return stubExists
         }
-        wait(for: [x], timeout: 5)
-        XCTAssertTrue(stubExists)
     }
 
     func testCallingBoundFunctionWorks() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.foo, as: "foo")
-
         loadWebViewAndWait()
-
-        let x = expectation(description: "js result")
-        webView.evaluateJavaScript("ConnectionTestBridge.foo();") { (result, error) in
-            x.fulfill()
+        
+        property("Test calling bound function", arguments: CheckerArguments(maxAllowableSuccessfulTests: 1)) <- {
+            let callbackExpectation = self.expectation(description: "js result")
+            self.webView?.evaluateJavaScript("ConnectionTestBridge.foo();") { (result, error) in
+                callbackExpectation.fulfill()
+            }
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return bridge.calledFoo
         }
-        wait(for: [x], timeout: 5)
-        XCTAssertTrue(bridge.calledFoo)
     }
 
+    func testCallWithCallback() {
+        let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
+        c.bind(ConnectionTestBridge.callWithCallback, as: "callWithCallback")
+        loadWebViewAndWait()
+        
+        property("Test call with a callback", arguments: CheckerArguments(maxAllowableSuccessfulTests: 1)) <- {
+            let callbackExpectation = self.expectation(description: "js result")
+            var callbackResult = 0
+            self.webView?.evaluateJavaScript("""
+                ConnectionTestBridge.callWithCallback((v) => {
+                    return v;
+                });
+                42;
+            """, completionHandler: { (result, error) in
+                callbackExpectation.fulfill();
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
+            
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return callbackResult == 42
+        }
+    }
+    
     func testBindingUnaryWithCallback() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.unaryWithCallback, as: "unaryWithCallback")
-        c.bind(ConnectionTestBridge.fulfillCallbackExpectation, as: "fulfillCallbackExpectation")
         loadWebViewAndWait()
-
-        let callbackExpectation = expectation(description: "callback")
-        bridge.callbackExpectation = callbackExpectation
-        webView.evaluateJavaScript("""
-            ConnectionTestBridge.unaryWithCallback((v) => {
-               ConnectionTestBridge.fulfillCallbackExpectation(v);
-            });
-            true;
-        """)
-
-        wait(for: [callbackExpectation], timeout: 5)
-        XCTAssertEqual(42, bridge.callbackResult)
+        
+        property("Test unary with callback") <- forAll { (n0: Int) in
+            let callbackExpectation = self.expectation(description: "js result")
+                
+            var callbackResult = 0
+            let jscall = self.generateJSFunction(fn: "unaryWithCallback", values: n0)
+            self.webView?.evaluateJavaScript(jscall, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
+                
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return callbackResult == n0
+        }
     }
 
     func testBindingBinaryWithCallback() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.binaryWithCallback, as: "binaryWithCallback")
-        c.bind(ConnectionTestBridge.fulfillCallbackExpectation, as: "fulfillCallbackExpectation")
         loadWebViewAndWait()
 
-        let callbackExpectation = expectation(description: "callback")
-        bridge.callbackExpectation = callbackExpectation
-        webView.evaluateJavaScript("""
-            ConnectionTestBridge.binaryWithCallback(9, (v) => {
-               ConnectionTestBridge.fulfillCallbackExpectation(v);
-            });
-            true;
-        """)
-
-        wait(for: [callbackExpectation], timeout: 5)
-        XCTAssertEqual(81, bridge.callbackResult)
+        property("Test binary with callback") <- forAll { (n0: Int, n1: Int) in
+            let callbackExpectation = self.expectation(description: "js result")
+            
+            var callbackResult = 0
+            let jscall = self.generateJSFunction(fn: "binaryWithCallback", values: n0, n1)
+            self.webView?.evaluateJavaScript(jscall, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
+            
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return n0 + n1 == callbackResult
+        }
     }
 
     func testBindingTernaryWithCallback() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.ternaryWithCallback, as: "ternaryWithCallback")
-        c.bind(ConnectionTestBridge.fulfillCallbackExpectation, as: "fulfillCallbackExpectation")
         loadWebViewAndWait()
 
-        let callbackExpectation = expectation(description: "callback")
-        bridge.callbackExpectation = callbackExpectation
-        webView.evaluateJavaScript("""
-            ConnectionTestBridge.ternaryWithCallback(2, 10, (v) => {
-               ConnectionTestBridge.fulfillCallbackExpectation(v);
-            });
-            true;
-        """)
-
-        wait(for: [callbackExpectation], timeout: 5)
-        XCTAssertEqual(1024, bridge.callbackResult)
+        property("Test ternary with callback") <- forAll { (n0: Int, n1: Int, n2: Int) in
+            let callbackExpectation = self.expectation(description: "js result")
+            
+            var callbackResult = 0
+            let jscall = self.generateJSFunction(fn: "ternaryWithCallback", values: n0, n1, n2)
+            self.webView?.evaluateJavaScript(jscall, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
+            
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return n0 + n1 + n2 == callbackResult
+        }
     }
 
     func testBindingQuaternaryWithCallback() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.quaternaryWithCallback, as: "quaternaryWithCallback")
-        c.bind(ConnectionTestBridge.fulfillCallbackExpectation, as: "fulfillCallbackExpectation")
         loadWebViewAndWait()
 
-        let callbackExpectation = expectation(description: "callback")
-        bridge.callbackExpectation = callbackExpectation
-        webView.evaluateJavaScript("""
-            ConnectionTestBridge.quaternaryWithCallback(3, 4, 5, (v) => {
-               ConnectionTestBridge.fulfillCallbackExpectation(v);
-            });
-            true;
-        """)
-
-        wait(for: [callbackExpectation], timeout: 5)
-        XCTAssertEqual(60, bridge.callbackResult)
+        property("Test quaternary with callback") <- forAll { (n0: Int, n1: Int, n2: Int, n3: Int) in
+            let callbackExpectation = self.expectation(description: "js result")
+            
+            var callbackResult = 0
+            let jscall = self.generateJSFunction(fn: "quaternaryWithCallback", values: n0, n1, n2, n3)
+            self.webView?.evaluateJavaScript(jscall, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return n0 + n1 + n2 + n3 == callbackResult
+        }
     }
 
     func testBindingQuinaryWithCallback() {
         let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
         c.bind(ConnectionTestBridge.quinaryWithCallback, as: "quinaryWithCallback")
-        c.bind(ConnectionTestBridge.fulfillCallbackExpectation, as: "fulfillCallbackExpectation")
         loadWebViewAndWait()
 
-        let callbackExpectation = expectation(description: "callback")
-        bridge.callbackExpectation = callbackExpectation
-        webView.evaluateJavaScript("""
-            ConnectionTestBridge.quinaryWithCallback(1, 2, 3, 4, (v) => {
-               ConnectionTestBridge.fulfillCallbackExpectation(v);
-            });
-            true;
-        """)
+        property("Test quinary with callback") <- forAll { (n0: Int, n1: Int, n2: Int, n3: Int, n4: Int) in
+            let callbackExpectation = self.expectation(description: "js result")
+            var callbackResult = 0
+            let jscall = self.generateJSFunction(fn: "quinaryWithCallback", values: n0, n1, n2, n3, n4)
+            self.webView?.evaluateJavaScript(jscall, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as Int) = result {
+                    callbackResult = value
+                }
+            })
 
-        wait(for: [callbackExpectation], timeout: 5)
-        XCTAssertEqual(10, bridge.callbackResult)
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return n0 + n1 + n2 + n3 + n4 == callbackResult
+        }
     }
+    
+    func testUnaryWithCallbackWithString() {
+        let c = Connection(from: webView, to: bridge, as: "ConnectionTestBridge")
+        c.bind(ConnectionTestBridge.unaryWithCallback, as: "unaryWithCallback")
+        loadWebViewAndWait()
+        
+        property("Test unary with callback timing") <- forAll { (a0: String) in
+            let callbackExpectation = self.expectation(description: "js result")
+            var callbackResult = ""
+            
+            let s = uppersAndLowers.proliferateNonEmpty.map { String($0) }.generate
+            let code = """
+                ConnectionTestBridge.unaryWithCallback((v) => {
+                    return v;
+                });
+                "\(s)";
+            """;
 
+            self.webView?.evaluateJavaScript(code, completionHandler: { (result, error) in
+                callbackExpectation.fulfill()
+                if case let .some(value as String) = result {
+                    callbackResult = value
+                }
+            })
+            
+            self.wait(for: [callbackExpectation], timeout: 5)
+            return callbackResult == s
+        }
+    }
 }

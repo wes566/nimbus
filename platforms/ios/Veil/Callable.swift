@@ -1,6 +1,6 @@
-// Copyright (c) 2018, salesforce.com, inc.
-// All rights reserved.
-// SPDX-License-Identifier: BSD-3-Clause
+// Copyright (c) 2018, salesforce.com, inc.    //
+// All rights reserved.    //  Copyright © 2018 Salesforce.com, inc. All rights reserved.
+// SPDX-License-Identifier: BSD-3-Clause    //
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 
 
@@ -142,6 +142,30 @@ struct Callable5<R, A0, A1, A2, A3, A4> : Callable {
 }
 
 /**
+ A `Callable` wrapper for 6-ary functions
+ */
+struct Callable6<R, A0, A1, A2, A3, A4, A5> : Callable {
+    typealias FunctionType = (A0, A1, A2, A3, A4, A5) -> R
+    let f: FunctionType
+    
+    init(_ f: @escaping FunctionType) {
+        self.f = f
+    }
+    
+    func call(args: [Any]) throws -> Any {
+        if  let a0 = args[0] as? A0,
+            let a1 = args[1] as? A1,
+            let a2 = args[2] as? A2,
+            let a3 = args[3] as? A3,
+            let a4 = args[4] as? A4,
+            let a5 = args[5] as? A5 {
+            return f(a0, a1, a2, a3, a4, a5)
+        }
+        throw ParameterError()
+    }
+}
+
+/**
  Create a `Callable` from a nullary function.
  */
 func make_callable<R>(_ f: @escaping () -> R) -> Callable {
@@ -181,4 +205,11 @@ func make_callable<R, A0, A1, A2, A3>(_ f: @escaping (A0, A1, A2, A3) -> R) -> C
  */
 func make_callable<R, A0, A1, A2, A3, A4>(_ f: @escaping (A0, A1, A2, A3, A4) -> R) -> Callable {
     return Callable5(f)
+}
+
+/**
+ Create a `Callable` from the quinary function.
+ */
+func make_callable<R, A0, A1, A2, A3, A4, A5>(_ f: @escaping (A0, A1, A2, A3, A4, A5) -> R) -> Callable {
+    return Callable6(f)
 }

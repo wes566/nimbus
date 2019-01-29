@@ -1,0 +1,3 @@
+target 'VeilTests' do
+	pod 'SwiftCheck', '~> 0.11.0'
+end
