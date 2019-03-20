@@ -9,6 +9,7 @@ package com.salesforce.nimbus
 
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import org.json.JSONArray
 import java.lang.ref.WeakReference
 
 /**
@@ -35,6 +36,13 @@ class NimbusConnectionBridge(webView: WebView) {
             return Callback(it, callbackId)
         }
         return null
+    }
+
+    @JavascriptInterface
+    fun getExtensionNames(): String {
+        var names = connections.map { it.name }
+        var result = JSONArray(names)
+        return result.toString()
     }
 
 }

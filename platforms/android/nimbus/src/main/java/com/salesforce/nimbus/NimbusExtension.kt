@@ -14,5 +14,7 @@ interface NimbusExtension {
 
     fun load(config: Map<String, String>, webView: WebView, callback: (Boolean) -> Unit)
 
+    fun preloadSync()
+    fun loadSync(webView: WebView)
     // TODO: add bridge lifecycle hooks...
 }

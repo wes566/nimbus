@@ -44,27 +44,27 @@ fun WebView.addConnection(target: Any, name: String, preScript: String? = null) 
 
         Connection.connectionMap[this] = NimbusConnectionBridge(this)
 
-        this.webViewClient = object : WebViewClient() {
-
-            override fun onPageCommitVisible(view: WebView, url: String?) {
-                // Run pre-script that needs Nimbus immediately after Nimbus is loaded
-                preScript?.let {
-                    view.evaluateJavascript(it) {
-                        Connection.connectionMap[view]?.connections?.forEach { connection ->
-                            view.evaluateJavascript("""
-                                ${connection.name} = nimbus.promisify(_${connection.name});
-                            """.trimIndent()) {}
-                        }
-                    }
-                } ?: run {
-                    Connection.connectionMap[view]?.connections?.forEach { connection ->
-                        view.evaluateJavascript("""
-                            ${connection.name} = nimbus.promisify(_${connection.name});
-                        """.trimIndent()) {}
-                    }
-                }
-            }
-        }
+//        this.webViewClient = object : WebViewClient() {
+//
+//            override fun onPageCommitVisible(view: WebView, url: String?) {
+//                // Run pre-script that needs Nimbus immediately after Nimbus is loaded
+//                preScript?.let {
+//                    view.evaluateJavascript(it) {
+//                        Connection.connectionMap[view]?.connections?.forEach { connection ->
+//                            view.evaluateJavascript("""
+//                                ${connection.name} = nimbus.promisify(_${connection.name});
+//                            """.trimIndent()) {}
+//                        }
+//                    }
+//                } ?: run {
+//                    Connection.connectionMap[view]?.connections?.forEach { connection ->
+//                        view.evaluateJavascript("""
+//                            ${connection.name} = nimbus.promisify(_${connection.name});
+//                        """.trimIndent()) {}
+//                    }
+//                }
+//            }
+//        }
     }
 
     Connection(this, target, name)
