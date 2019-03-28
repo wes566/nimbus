@@ -15,14 +15,29 @@ import com.salesforce.nimbus.NimbusExtension
 import com.salesforce.nimbus.addConnection
 import java.util.*
 
-@Extension
 class SimpleBridgeExtension : NimbusExtension {
+    @Extension
     class Bridge {
 
         @ExtensionMethod
         @JavascriptInterface
         fun currentTime(): String {
             return Date().toString()
+        }
+
+        @ExtensionMethod
+        fun anotherMethod(arg: String, arg2: Int): String {
+            return ""
+        }
+
+        @ExtensionMethod
+        fun voidReturn(arg: Int) {
+
+        }
+
+        @ExtensionMethod
+        fun funArg(arg: (String) -> Void) {
+
         }
     }
 
