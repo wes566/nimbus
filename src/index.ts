@@ -57,11 +57,21 @@ class Nimbus {
 
   public promisify = (src: any) => {
     let dest: any = {};
-    Object.keys(src).forEach(k => {
-      let f = src[k];
-      dest[k] = (...args: any[]) => {
+    Object.keys(src).forEach(key => {
+      let func = src[key];
+      dest[key] = (...args: any[]) => {
         args = this.cloneArguments(args);
-        return Promise.resolve(f.call(src, ...args));
+        args = args.map(arg => {
+          if (typeof arg === "object") {
+            return JSON.stringify(arg);
+          }
+          return arg;
+        });
+        let result = func.call(src, ...args);
+        if (result !== undefined) {
+          result = JSON.parse(result);
+        }
+        return Promise.resolve(result);
       };
     });
     return dest;
@@ -73,13 +83,16 @@ class Nimbus {
       if (typeof args[i] === "function") {
         const callbackId = this.uuidv4();
         this.callbacks[callbackId] = args[i];
-        // TODO: this should generalize better, perhaps with an explicit
-        // platform check?
+        // TODO: this should generalize better, perhaps with an explicit platform
+        // check?
         if (
           typeof _nimbus !== "undefined" &&
           _nimbus.makeCallback !== undefined
         ) {
-          clonedArgs.push(_nimbus.makeCallback(callbackId));
+          // TODO: Android passes only the callbackId string, whereas iOS passes an
+          // object with the callbackId property. These need to be merged and handled
+          // the same way to eliminate extraneous code paths
+          clonedArgs.push(callbackId);
         } else {
           clonedArgs.push({ callbackId });
         }
@@ -90,10 +103,16 @@ class Nimbus {
     return clonedArgs;
   };
 
-  public callCallback = (callbackId: string, args: [any]) => {
+  public callCallback = (callbackId: string, args: any[]) => {
     if (this.callbacks[callbackId]) {
       this.callbacks[callbackId](...args);
     }
+  };
+
+  // TODO: This version is called by Android, callCallback is called by iOS. The
+  // two need to be consolidated.
+  public callCallback2 = (callbackId: string, ...args: any[]) => {
+    this.callCallback(callbackId, args);
   };
 
   public releaseCallback = (callbackId: string) => {
