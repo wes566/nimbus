@@ -201,6 +201,21 @@ extension Connection {
     /**
      Bind the specified function to this connection.
      */
+    public func bind<CB0, CB1: Encodable>(_ function: @escaping (C) -> ((CB0, CB1) -> Void) -> Void, as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (callable: Callable) -> EncodableValue in
+            boundFunction { cb0, cb1 in
+                _ = try! callable.call(args: [cb0, cb1]) // swiftlint:disable:this force_try
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     public func bind<R: Encodable, A0, A1>(_ function: @escaping (C) -> (A0, A1) -> R, as name: String) {
         let boundFunction = function(target)
         let wrappedFunction = { (arg0: A0, arg1: A1) -> EncodableValue in
@@ -232,6 +247,21 @@ extension Connection {
         let wrappedFunction = { (arg0: A0, callable: Callable) -> EncodableValue in
             boundFunction(arg0) { cb0 in
                 _ = try! callable.call(args: [cb0]) // swiftlint:disable:this force_try
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    public func bind<A0, CB0, CB1: Encodable>(_ function: @escaping (C) -> (A0, @escaping (CB0, CB1) -> Void) -> Void, as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (arg0: A0, callable: Callable) -> EncodableValue in
+            boundFunction(arg0) { cb0, cb1 in
+                _ = try! callable.call(args: [cb0, cb1]) // swiftlint:disable:this force_try
             }
             return .void
         }
@@ -283,6 +313,21 @@ extension Connection {
     /**
      Bind the specified function to this connection.
      */
+    public func bind<A0, A1, CB0, CB1: Encodable>(_ function: @escaping (C) -> (A0, A1, @escaping (CB0, CB1) -> Void) -> Void, as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (arg0: A0, arg1: A1, callable: Callable) -> EncodableValue in
+            boundFunction(arg0, arg1) { cb0, cb1 in
+                _ = try! callable.call(args: [cb0, cb1]) // swiftlint:disable:this force_try
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     public func bind<R: Encodable, A0, A1, A2, A3>(_ function: @escaping (C) -> (A0, A1, A2, A3) -> R, as name: String) {
         let boundFunction = function(target)
         let wrappedFunction = { (arg0: A0, arg1: A1, arg2: A2, arg3: A3) -> EncodableValue in
@@ -314,6 +359,22 @@ extension Connection {
         let wrappedFunction = { (arg0: A0, arg1: A1, arg2: A2, callable: Callable) -> EncodableValue in
             boundFunction(arg0, arg1, arg2) { cb0 in
                 _ = try! callable.call(args: [cb0]) // swiftlint:disable:this force_try
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    public func bind<A0, A1, A2, CB0, CB1: Encodable>(_ function: @escaping (C) -> (A0, A1, A2, @escaping (CB0, CB1) -> Void) -> Void,
+                                                      as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (arg0: A0, arg1: A1, arg2: A2, callable: Callable) -> EncodableValue in
+            boundFunction(arg0, arg1, arg2) { cb0, cb1 in
+                _ = try! callable.call(args: [cb0, cb1]) // swiftlint:disable:this force_try
             }
             return .void
         }
@@ -356,6 +417,22 @@ extension Connection {
         let wrappedFunction = { (arg0: A0, arg1: A1, arg2: A2, arg3: A3, callable: Callable) -> EncodableValue in
             boundFunction(arg0, arg1, arg2, arg3) { cb0 in
                 _ = try! callable.call(args: [cb0]) // swiftlint:disable:this force_try
+            }
+            return .void
+        }
+        let callable = make_callable(wrappedFunction)
+        bind(callable, as: name)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    public func bind<A0, A1, A2, A3, CB0, CB1: Encodable>(_ function: @escaping (C) -> (A0, A1, A2, A3, @escaping (CB0, CB1) -> Void) -> Void,
+                                                          as name: String) {
+        let boundFunction = function(target)
+        let wrappedFunction = { (arg0: A0, arg1: A1, arg2: A2, arg3: A3, callable: Callable) -> EncodableValue in
+            boundFunction(arg0, arg1, arg2, arg3) { cb0, cb1 in
+                _ = try! callable.call(args: [cb0, cb1]) // swiftlint:disable:this force_try
             }
             return .void
         }
