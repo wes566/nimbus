@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val webView = findViewById<WebView>(R.id.webview)
-        bridge.addExtension(SimpleBridgeExtension())
+        bridge.add(SimpleBridgeExtensionBinder(SimpleBridgeExtension()))
         bridge.attach(webView)
     }
 

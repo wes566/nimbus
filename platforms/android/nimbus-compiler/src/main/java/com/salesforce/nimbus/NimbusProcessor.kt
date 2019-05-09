@@ -85,13 +85,11 @@ class NimbusProcessor: AbstractProcessor() {
                     .addModifiers(Modifier.PUBLIC)
                     .addMethod(MethodSpec.constructorBuilder()
                         .addParameter(TypeName.get(element.asType()), "target")
-                        .addParameter(webViewClassName, "webView")
                         .addModifiers(Modifier.PUBLIC)
                         .addStatement("this.\$N = \$N", "target", "target")
-                        .addStatement("this.\$N = \$N", "webView", "webView")
                         .build())
                     .addField(TypeName.get(element.asType()), "target", Modifier.FINAL, Modifier.PRIVATE)
-                    .addField(webViewClassName, "webView", Modifier.FINAL, Modifier.PRIVATE)
+                    .addField(webViewClassName, "webView", Modifier.PRIVATE)
                     .addField(FieldSpec.builder(stringClassName, "extensionName", Modifier.FINAL, Modifier.PRIVATE)
                         .initializer("\"$extensionName\"")
                         .build())
@@ -106,6 +104,12 @@ class NimbusProcessor: AbstractProcessor() {
                         .addModifiers(Modifier.PUBLIC)
                         .returns(stringClassName)
                         .addStatement("return extensionName")
+                        .build())
+                    .addMethod(MethodSpec.methodBuilder("setWebView")
+                        .addAnnotation(Override::class.java)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addParameter(webViewClassName, "webView")
+                        .addStatement("this.\$N = \$N", "webView", "webView")
                         .build())
 
                 methods.forEach {
@@ -156,14 +160,23 @@ class NimbusProcessor: AbstractProcessor() {
                                             val wild = typeMirror as WildcardType
                                             invoke.addParameter(TypeName.get(wild.superBound), "arg$index")
                                         }
-                                        argBlock.add("new \$T(arg$index),\n", ClassName.get("com.salesforce.nimbus", "PrimitiveJSONSerializable"))
+                                        argBlock.add("arg$index != null ? new \$T(arg$index) : null,\n", ClassName.get("com.salesforce.nimbus", "PrimitiveJSONSerializable"))
                                     }
 
                                     argBlock.unindent().add("};\n")
 
                                     invoke.addCode(argBlock.build())
-                                    invoke.addStatement("callJavascript(\$N, \$S, \$N, null)", "webView", "nimbus.callCallback2", "args")
-                                        .addStatement("return null")
+                                    invoke
+                                        .addCode(
+                                            CodeBlock.builder()
+                                                .add("if (webView != null) {\n")
+                                                .indent()
+                                                .addStatement("callJavascript(\$N, \$S, \$N, null)", "webView", "nimbus.callCallback2", "args")
+                                                .unindent()
+                                                .add("}\n")
+                                                .addStatement("return null")
+                                                .build()
+                                        )
 
                                     val typeArgs = declaredType.typeArguments.map {
                                         if (it.kind == TypeKind.WILDCARD) {
