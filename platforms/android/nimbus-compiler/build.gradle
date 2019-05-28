@@ -7,6 +7,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation project(':nimbus-annotations')
     implementation 'com.squareup:javapoet:1.11.1'
+    implementation 'junit:junit:4.12'
 }
 
 sourceCompatibility = "7"
