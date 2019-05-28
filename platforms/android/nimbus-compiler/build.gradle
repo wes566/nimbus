@@ -8,6 +8,7 @@ dependencies {
     implementation project(':nimbus-annotations')
     implementation 'com.squareup:javapoet:1.11.1'
     implementation 'junit:junit:4.12'
+    testImplementation "org.permissionsdispatcher:kompile-testing:0.1.2"
 }
 
 sourceCompatibility = "7"
