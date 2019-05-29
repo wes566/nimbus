@@ -3,6 +3,8 @@ package com.salesforce.nimbus
 import org.junit.Test
 import kompile.testing.kotlinc
 
+interface NimbusExtension{}
+
 class NimbusProcessorTest {
     @Test
     fun generate_Extension(){
@@ -11,7 +13,7 @@ class NimbusProcessorTest {
                 .addKotlin("input.kt", """
             package com.salesforce.nimbus
 
-            @Extension(name = "ExtensionTestName")
+//            @Extension(name = "ExtensionTestName")
             class ExtensionTestClass : NimbusExtension {
                 @ExtensionMethod
                 fun testExtensionMethod(): String {
