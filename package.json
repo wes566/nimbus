@@ -9,7 +9,7 @@
     "bundle": "rollup dist/index.js --file dist/nimbus.js --name nimbus --format iife",
     "compile": "tsc -p ./",
     "lint": "eslint 'src/**/*.{ts,js}'",
-    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "prettier": "prettier --write 'src/**/*.{js,ts}'"
   },
   "repository": {
