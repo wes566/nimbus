@@ -1,5 +1,7 @@
 # Nimbus
 
+> :warning: This is pre-production software and not recommended for production use.
+
 Nimbus is a bridge for hybrid app development.
 
 ## Building and Running
