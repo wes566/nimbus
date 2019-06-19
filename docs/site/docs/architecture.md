@@ -307,6 +307,38 @@ object. The token passed across the bridge should be owned by an
 object in the native code that will delete the callback from
 JavaScript at the end of its lifetime to ensure cleanup happens.
 
+## Publish-subscribe Pattern
+
+Nimbus provides publish-subscribe pattern where native code can raise
+an event.  That event will be bridged over to javascript code and all listeners
+that have subscribed for that particular event can have their callback functions called.
+
+To subscribe to an event pass a name of the event to listen to and a callback.
+Callback can optionally expect a single parameter passed back from the event publisher:
+```javascript
+let callback = function (dataFromFromPublisher) {
+    // Handle event raised.  dataFromPublisher is data returned from
+    // the publisher and can be used for further processing.
+};
+
+nimbus.subscribe("someEventName", callback);
+```
+
+To publish an event from the native code so that javascript code can listen to, do similar
+to the following:
+```kotlin
+    webView.broadcastMessage("someEventName", dataToSendToSubscribers);
+```
+where dataToSendToSubscribers needs to be an object or primitive that is serializable to
+JSON.
+
+Listener to an event can unsubscribe itself by:
+```javascript
+    nimbus.unsubscribeMessage('someEventName', callback);
+```
+
+See the native API docs for respective platform for more information.
+
 ## Android Native API
 
 TBD
