@@ -316,7 +316,7 @@ that have subscribed for that particular event can have their callback functions
 To subscribe to an event pass a name of the event to listen to and a callback.
 Callback can optionally expect a single parameter passed back from the event publisher:
 ```javascript
-let callback = function (dataFromFromPublisher) {
+let callback = function (dataFromPublisher) {
     // Handle event raised.  dataFromPublisher is data returned from
     // the publisher and can be used for further processing.
 };
