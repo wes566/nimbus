@@ -79,7 +79,7 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
         webView.evaluateJavaScript("mocha.run((failures) => { mochaTestBridge.testsCompleted(failures); }); true;") { _, _ in
         }
 
-        wait(for: [testBridge.expectation], timeout: 5)
+        wait(for: [testBridge.expectation], timeout: 30)
         XCTAssertEqual(testBridge.failures, 0)
     }
 }
