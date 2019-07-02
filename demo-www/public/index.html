@@ -1,15 +1,21 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0"
     />
-    <meta charset="UTF-8" />
-    <title>This is an lwc app</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Nimbus Demo</title>
+    <script src="bundle.js"></script>
   </head>
   <body>
-    <p>Hello.</p>
-    <div id="app"></div>
-    <script src="/bundle.js"></script>
+    <nimbus-demo-app>
+      <nimbus-header>
+        Welcome to Nimbus
+      </nimbus-header>
+      <nimbus-device-info></nimbus-device-info>
+    </nimbus-demo-app>
   </body>
 </html>

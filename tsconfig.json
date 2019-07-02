@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "es2015",
-    "lib": ["es2015", "dom", "scripthost"],
+    "lib": ["es2015", "dom"],
     "sourceMap": true,
     "declaration": true,
-    "strict": true,                           /* Enable all strict type-checking options. */
+    "strict": true /* Enable all strict type-checking options. */,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -14,13 +14,13 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "outDir": "dist",
+    "outDir": "dist"
+    // "baseUrl": "./",
+    // "paths": {
+    //   "nimbus": ["./src/index.ts"]
+    // },
+    // "rootDirs": ["./src", "./demo-new/src"]
   },
-  "include": [
-    "src/",
-  ],
-  "exclude": [
-    "demo-www",
-    "test-www",
-  ]
+  "include": ["src/"],
+  "exclude": ["demo-www", "test-www"]
 }

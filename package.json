@@ -5,9 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run compile && npm run bundle",
-    "bundle": "rollup dist/index.js --file dist/nimbus.js --name nimbus --format iife",
-    "compile": "tsc -p ./",
+    "build": "rollup -c rollup.config.js",
+    "build:demo": "rollup -c rollup-demo.config.js",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "prepare": "npm run build",
     "prettier": "prettier --write 'src/**/*.{js,ts}'"
@@ -18,13 +17,16 @@
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^1.5.0",
-    "@typescript-eslint/parser": "^1.5.0",
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
     "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "prettier": "^1.16.4",
-    "rollup": "^1.1.2",
-    "typescript": "^3.3.3"
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "fs-extra": "^8.0.1",
+    "prettier": "^1.18.2",
+    "rollup": "^1.15.6",
+    "rollup-plugin-serve": "^1.0.1",
+    "rollup-plugin-typescript2": "^0.21.2",
+    "typescript": "^3.5.2"
   }
 }
