@@ -76,7 +76,12 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
 
         loadWebViewAndWait()
 
-        webView.evaluateJavaScript("mocha.run((failures) => { mochaTestBridge.testsCompleted(failures); }); true;") { _, _ in
+        webView.evaluateJavaScript("mocha.run((failures) => { mochaTestBridge.testsCompleted(failures); }); true;") { _, error in
+
+            if let error = error {
+                XCTFail(error.localizedDescription)
+            }
+
         }
 
         wait(for: [testBridge.expectation], timeout: 30)
