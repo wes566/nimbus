@@ -8,8 +8,9 @@
 import {LightningElement, track} from 'lwc';
 
 export default class App extends LightningElement {
-  @track
-  lastClick = "never";
+  @track lastClick = "never";
+  @track uddtString = "";
+  @track uddtNumber = "";
 
   constructor() {
     super();
@@ -18,4 +19,13 @@ export default class App extends LightningElement {
   showTime(e) {
     DemoBridge.currentTime().then(t => this.lastClick = t);
   }
+
+  getUddt(e) {
+    DemoBridge.getDataViaCallback((myUserDefinedDataType) => {
+      this.uddtString = myUserDefinedDataType.stringParam;
+      this.uddtNumber = myUserDefinedDataType.intParam;
+    })
+  }
+
+
 }

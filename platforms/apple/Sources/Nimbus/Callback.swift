@@ -29,11 +29,23 @@ class Callback: Callable {
     }
 
     func call(args: [Any]) throws -> Any {
-        let jsonData = try JSONSerialization.data(withJSONObject: args, options: [])
-        let jsonString = String(data: jsonData, encoding: .utf8)
+        var jsonString: String = "[]"
+        if let encodables = args as? [Encodable] {
+            let jsonEncoder = JSONEncoder()
+            let jsonData = try jsonEncoder.encode(EncodableValue.array(encodables))
+            jsonString = String(data: jsonData, encoding: .utf8)!
+        } else {
+            // Parameters passed to callback are implied that they
+            // conform to Encodable protocol.  If for some reason
+            // any elements don't throw parameter error.
+            throw ParameterError()
+        }
+
         DispatchQueue.main.async {
             self.webView?.evaluateJavaScript("""
-            nimbus.callCallback('\(self.callbackId)', \(jsonString!));
+                var jsonArgs = \(jsonString);
+                mappedJsonArgs = jsonArgs.v;
+                nimbus.callCallback('\(self.callbackId)', mappedJsonArgs);
             """)
         }
         return ()

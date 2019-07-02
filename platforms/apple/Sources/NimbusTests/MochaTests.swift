@@ -36,6 +36,7 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
                 webView.broadcastMessage(name: name)
             }
         }
+
     }
 
     var webView: WKWebView!
@@ -70,6 +71,8 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
         connection.bind(MochaTestBridge.testsCompleted, as: "testsCompleted")
         connection.bind(MochaTestBridge.ready, as: "ready")
         connection.bind(MochaTestBridge.sendMessage, as: "sendMessage")
+        let callbackTestExtension = CallbackTestExtension()
+        callbackTestExtension.bindToWebView(webView: webView)
 
         loadWebViewAndWait()
 
@@ -78,5 +81,38 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
 
         wait(for: [testBridge.expectation], timeout: 5)
         XCTAssertEqual(testBridge.failures, 0)
+    }
+}
+
+public class CallbackTestExtension {
+    func callbackWithSingleParam(completion: @escaping (MochaTests.MochaMessage) -> Swift.Void) {
+        let mochaMessage = MochaTests.MochaMessage()
+        completion(mochaMessage)
+    }
+    func callbackWithTwoParams(completion: @escaping (MochaTests.MochaMessage, MochaTests.MochaMessage) -> Swift.Void) {
+        var mochaMessage = MochaTests.MochaMessage()
+        mochaMessage.intField = 6
+        mochaMessage.stringField = "int param is 6"
+        completion(MochaTests.MochaMessage(), mochaMessage)
+    }
+    func callbackWithSinglePrimitiveParam(completion: @escaping (Int) -> Swift.Void) {
+        completion(777)
+    }
+    func callbackWithTwoPrimitiveParams(completion: @escaping (Int, Int) -> Swift.Void) {
+        completion(777, 888)
+    }
+    func callbackWithPrimitiveAndUddtParams(completion: @escaping (Int, MochaTests.MochaMessage) -> Swift.Void) {
+        completion(777, MochaTests.MochaMessage())
+    }
+}
+
+extension CallbackTestExtension: NimbusExtension {
+    public func bindToWebView(webView: WKWebView) {
+        let connection = webView.addConnection(to: self, as: "callbackTestExtension")
+        connection.bind(CallbackTestExtension.callbackWithSingleParam, as: "callbackWithSingleParam")
+        connection.bind(CallbackTestExtension.callbackWithTwoParams, as: "callbackWithTwoParams")
+        connection.bind(CallbackTestExtension.callbackWithSinglePrimitiveParam, as: "callbackWithSinglePrimitiveParam")
+        connection.bind(CallbackTestExtension.callbackWithTwoPrimitiveParams, as: "callbackWithTwoPrimitiveParams")
+        connection.bind(CallbackTestExtension.callbackWithPrimitiveAndUddtParams, as: "callbackWithPrimitiveAndUddtParams")
     }
 }

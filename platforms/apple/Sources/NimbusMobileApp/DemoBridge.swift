@@ -9,9 +9,18 @@ import Foundation
 import Nimbus
 import WebKit
 
+class MyUserDefinedDataType: Encodable {
+    var intParam = 5
+    var stringParam = "hello my user defined type"
+}
+
 class DemoBridge {
     func currentTime() -> String {
         return Date().description
+    }
+
+    func getDataViaCallback(completion:@escaping (MyUserDefinedDataType) -> Swift.Void) {
+        completion(MyUserDefinedDataType())
     }
 }
 
@@ -19,5 +28,6 @@ extension DemoBridge: NimbusExtension {
     func bindToWebView(webView: WKWebView) {
         let connection = webView.addConnection(to: self, as: "DemoBridge")
         connection.bind(DemoBridge.currentTime, as: "currentTime")
+        connection.bind(DemoBridge.getDataViaCallback, as: "getDataViaCallback")
     }
 }
