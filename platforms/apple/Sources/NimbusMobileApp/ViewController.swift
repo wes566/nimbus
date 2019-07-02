@@ -15,7 +15,6 @@ class ViewController: UIViewController {
         super.init(coder: aDecoder)
         title = "Nimbus"
 
-        bridge.addExtension(DemoBridge())
         bridge.addExtension(DeviceExtension())
     }
 

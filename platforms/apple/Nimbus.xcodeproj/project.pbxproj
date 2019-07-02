@@ -31,7 +31,6 @@
 		2944337D2202059700E6D084 /* test.html in Resources */ = {isa = PBXBuildFile; fileRef = 2944337B2202059700E6D084 /* test.html */; };
 		2944337E2202059700E6D084 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = 2944337C2202059700E6D084 /* test.js */; };
 		29443380220206B700E6D084 /* TestBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2944337F220206B700E6D084 /* TestBridge.swift */; };
-		29610FC621E53881007058EA /* DemoBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29610FC521E53881007058EA /* DemoBridge.swift */; };
 		2970E432224F0A05008DC004 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970E431224F0A05008DC004 /* AppDelegate.swift */; };
 		2970E434224F0A05008DC004 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970E433224F0A05008DC004 /* ViewController.swift */; };
 		2970E436224F0A06008DC004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2970E435224F0A06008DC004 /* Assets.xcassets */; };
@@ -150,7 +149,6 @@
 		2944337B2202059700E6D084 /* test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = test.html; sourceTree = "<group>"; };
 		2944337C2202059700E6D084 /* test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
 		2944337F220206B700E6D084 /* TestBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestBridge.swift; sourceTree = "<group>"; };
-		29610FC521E53881007058EA /* DemoBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBridge.swift; sourceTree = "<group>"; };
 		2961103021E54872007058EA /* NimbusApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NimbusApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		2970E42F224F0A05008DC004 /* NimbusDesktop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NimbusDesktop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2970E431224F0A05008DC004 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -166,9 +164,9 @@
 		2970E44F224F0A06008DC004 /* NimbusDesktopUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NimbusDesktopUITests.swift; sourceTree = "<group>"; };
 		2970E451224F0A06008DC004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2970E498224F0D46008DC004 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-    29F8D60E223AF857005C5AC1 /* DeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceExtension.swift; sourceTree = "<group>"; };
 		298503D8228DEAAC00C1071E /* Binder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Binder.swift; sourceTree = "<group>"; };
 		298503DA228DED3500C1071E /* BinderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinderTests.swift; sourceTree = "<group>"; };
+		29F8D60E223AF857005C5AC1 /* DeviceExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceExtension.swift; sourceTree = "<group>"; };
 		F0639DA54032B895278BC4F0 /* libPods-Nimbus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Nimbus.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C5ADAA535D8E3DA7092137 /* libPods-NimbusApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NimbusApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F758AEB65FD9A33F4F5EC397 /* Pods-NimbusApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NimbusApp.release.xcconfig"; path = "Target Support Files/Pods-NimbusApp/Pods-NimbusApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -267,7 +265,6 @@
 			children = (
 				291A85E821E52D3E00510832 /* AppDelegate.swift */,
 				291A85EF21E52D4000510832 /* Assets.xcassets */,
-				29610FC521E53881007058EA /* DemoBridge.swift */,
 				291A85F421E52D4000510832 /* Info.plist */,
 				291A85F121E52D4000510832 /* LaunchScreen.storyboard */,
 				291A85EC21E52D3E00510832 /* Main.storyboard */,
@@ -743,7 +740,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2944337A2202059000E6D084 /* TestViewController.swift in Sources */,
-				29610FC621E53881007058EA /* DemoBridge.swift in Sources */,
 				291A85EB21E52D3E00510832 /* ViewController.swift in Sources */,
 				29443380220206B700E6D084 /* TestBridge.swift in Sources */,
 				291A85E921E52D3E00510832 /* AppDelegate.swift in Sources */,
