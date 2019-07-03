@@ -1,13 +1,17 @@
 import typescript from "rollup-plugin-typescript2";
 
-const iife = {
-  plugins: [typescript()],
+export default {
   input: "src/index.ts",
-  output: {
-    file: "dist/nimbus.js",
-    name: "nimbus",
-    format: "iife"
-  }
+  output: [
+    {
+      file: "dist/umd/nimbus.js",
+      name: "nimbus",
+      format: "umd"
+    },
+    {
+      file: "dist/es/nimbus.js",
+      format: "es"
+    }
+  ],
+  plugins: [typescript()]
 };
-
-export default [iife];
