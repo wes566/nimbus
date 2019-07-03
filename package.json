@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.soma.salesforce.com:MobilePlatform/Nimbus.git"
+    "url": "git@github.com:salesforce/nimbus.git"
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
