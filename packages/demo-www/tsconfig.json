@@ -1,10 +1,3 @@
 {
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "baseUrl": "..",
-    "paths": {
-      "nimbus": ["src/index.ts"],
-      "nimbus/*": ["src/*"]
-    }
-  }
+    "extends": "../../tsconfig.json"
 }
