@@ -1,7 +1,8 @@
 {
     "name": "nimbus-demo-app",
-    "version": "0.0.3",
+    "version": "0.2.0",
     "description": "A demo hybrid app for nimbus",
+    "license": "BSD-3-Clause",
     "main": "src/index.js",
     "scripts": {
         "prepare": "npm run build",
@@ -10,8 +11,6 @@
         "serve": "cross-env rollup -c ./rollup.config.js --watch",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
-    "author": "Jason Foreman <jforeman@salesforce.com>",
-    "license": "MIT",
     "devDependencies": {
         "@babel/core": "^7.2.2",
         "@lwc/compiler": "^0.40.0",
@@ -27,9 +26,11 @@
         "rimraf": "^2.6.2",
         "rollup": "^0.68.1",
         "rollup-plugin-node-resolve": "^4.0.0",
-        "rollup-plugin-serve": "^0.6.0"
+        "rollup-plugin-serve": "^0.6.0",
+        "rollup-plugin-typescript2": "^0.21.2",
+        "typescript": "^3.5.2"
     },
     "dependencies": {
-        "nimbus": "file:../"
+        "nimbus-bridge": "^0.2.0"
     }
 }
