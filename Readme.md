@@ -6,11 +6,11 @@ Nimbus is a bridge for hybrid app development.
 
 ## Building and Running
 
-Nimbus uses a hybrid web app located in `demo-www`. Ensure it is
+Nimbus uses a hybrid web app located in `/packages/demo-www`. Ensure it is
 running prior to launching one of the platform apps.
 
 ```sh
-cd demo-www
+cd packages/demo-www
 npm install
 npm run serve
 ```
