@@ -3,6 +3,7 @@
     "version": "0.0.3",
     "description": "Nimbus is a bridge for hybrid app development.",
     "main": "dist/index.js",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
         "build": "rollup -c rollup.config.js",
@@ -12,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git@git.soma.salesforce.com:MobilePlatform/Nimbus.git"
+        "url": "git@github.com:salesforce/nimbus.git"
     },
     "license": "BSD-3-Clause",
     "devDependencies": {
