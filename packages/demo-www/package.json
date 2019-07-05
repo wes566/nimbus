@@ -4,9 +4,9 @@
     "description": "A demo hybrid app for nimbus",
     "main": "src/index.js",
     "scripts": {
+        "prepare": "npm run build",
         "build": "cross-env rollup -c ./rollup.config.js",
-        "clean": "rm -rf ./dist && rm -rf ./no-types",
-        "preinstall": "pushd .. && npm run build && popd",
+        "clean": "rm -rf ./dist",
         "serve": "cross-env rollup -c ./rollup.config.js --watch",
         "test": "echo \"Error: no test specified\" && exit 1"
     },

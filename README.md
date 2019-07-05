@@ -10,9 +10,7 @@ Nimbus uses a hybrid web app located in `/packages/demo-www`. Ensure it is
 running prior to launching one of the platform apps.
 
 ```sh
-cd packages/demo-www
-npm install
-npm run serve
+npm run start:demo
 ```
 
 Then launch one of the platforms apps located under `platforms/`.
