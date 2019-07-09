@@ -31,7 +31,6 @@
 		2944337D2202059700E6D084 /* test.html in Resources */ = {isa = PBXBuildFile; fileRef = 2944337B2202059700E6D084 /* test.html */; };
 		2944337E2202059700E6D084 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = 2944337C2202059700E6D084 /* test.js */; };
 		29443380220206B700E6D084 /* TestBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2944337F220206B700E6D084 /* TestBridge.swift */; };
-		29610FC621E53881007058EA /* DemoBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29610FC521E53881007058EA /* DemoBridge.swift */; };
 		2970E432224F0A05008DC004 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970E431224F0A05008DC004 /* AppDelegate.swift */; };
 		2970E434224F0A05008DC004 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970E433224F0A05008DC004 /* ViewController.swift */; };
 		2970E436224F0A06008DC004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2970E435224F0A06008DC004 /* Assets.xcassets */; };
@@ -133,7 +132,7 @@
 		291A860521E530BC00510832 /* Nimbus.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Nimbus.h; sourceTree = "<group>"; };
 		291A860621E530BC00510832 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		29245EE1220CE13000F9EEAF /* MochaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MochaTests.swift; sourceTree = "<group>"; };
-		29245EE5220CE18100F9EEAF /* test-www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "test-www"; path = "../../../../test-www/dist/test-www"; sourceTree = "<group>"; };
+		29245EE5220CE18100F9EEAF /* test-www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "test-www"; path = "../../../../packages/test-www/dist/test-www"; sourceTree = "<group>"; };
 		294433422200FA3700E6D084 /* Callback.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Callback.swift; sourceTree = "<group>"; };
 		294433432200FA3700E6D084 /* WebView+Nimbus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebView+Nimbus.swift"; sourceTree = "<group>"; };
 		294433442200FA3700E6D084 /* EncodableValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncodableValue.swift; sourceTree = "<group>"; };
@@ -150,7 +149,6 @@
 		2944337B2202059700E6D084 /* test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = test.html; sourceTree = "<group>"; };
 		2944337C2202059700E6D084 /* test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
 		2944337F220206B700E6D084 /* TestBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestBridge.swift; sourceTree = "<group>"; };
-		29610FC521E53881007058EA /* DemoBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBridge.swift; sourceTree = "<group>"; };
 		2961103021E54872007058EA /* NimbusApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NimbusApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		2970E42F224F0A05008DC004 /* NimbusDesktop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NimbusDesktop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2970E431224F0A05008DC004 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -267,7 +265,6 @@
 			children = (
 				291A85E821E52D3E00510832 /* AppDelegate.swift */,
 				291A85EF21E52D4000510832 /* Assets.xcassets */,
-				29610FC521E53881007058EA /* DemoBridge.swift */,
 				291A85F421E52D4000510832 /* Info.plist */,
 				291A85F121E52D4000510832 /* LaunchScreen.storyboard */,
 				291A85EC21E52D3E00510832 /* Main.storyboard */,
@@ -710,7 +707,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "pushd ${SRCROOT}/../../test-www\nnpm install\nnpm run build\n";
+			shellScript = "pushd ${SRCROOT}/../..\nnpm install\n";
 			showEnvVarsInLog = 0;
 		};
 		9FEF50A5D8465398A936A9DE /* [CP] Check Pods Manifest.lock */ = {
@@ -743,7 +740,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2944337A2202059000E6D084 /* TestViewController.swift in Sources */,
-				29610FC621E53881007058EA /* DemoBridge.swift in Sources */,
 				291A85EB21E52D3E00510832 /* ViewController.swift in Sources */,
 				29443380220206B700E6D084 /* TestBridge.swift in Sources */,
 				291A85E921E52D3E00510832 /* AppDelegate.swift in Sources */,
@@ -1097,8 +1093,8 @@
 		2944335B2200FD8D00E6D084 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 62J96EUJ9N;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = 4C8Q6SU642;
 				INFOPLIST_FILE = Sources/NimbusTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1107,6 +1103,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.salesforce.NimbusTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1115,8 +1112,8 @@
 		2944335C2200FD8D00E6D084 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 62J96EUJ9N;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = 4C8Q6SU642;
 				INFOPLIST_FILE = Sources/NimbusTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1125,6 +1122,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.salesforce.NimbusTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

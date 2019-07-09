@@ -1,26 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "es2015",
-    "lib": ["es2015", "dom", "scripthost"],
-    "sourceMap": true,
-    "declaration": true,
-    "strict": true,                           /* Enable all strict type-checking options. */
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "outDir": "dist",
-  },
-  "include": [
-    "src/",
-  ],
-  "exclude": [
-    "demo-www",
-    "test-www",
-  ]
+    "compilerOptions": {
+        "target": "es6",
+        "module": "es2015",
+        "lib": ["es2015", "dom"],
+        "sourceMap": true,
+        "declaration": true,
+        "strict": true /* Enable all strict type-checking options. */,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true
+    }
 }
