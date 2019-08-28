@@ -1,0 +1,12 @@
+coverage:
+  status:
+    project:
+      default: false
+      nimbus:
+        target: 75%
+        paths:
+          - "platforms/apple/Sources/Nimbus"
+          - "platforms/android/nimbus/src/main"
+
+ignore:
+  - "platforms/apple/Sources/NimbusTests"
