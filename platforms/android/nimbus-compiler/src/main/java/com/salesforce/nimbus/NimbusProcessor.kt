@@ -9,6 +9,7 @@ import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
+import org.json.JSONException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
@@ -111,6 +112,8 @@ class NimbusProcessor : AbstractProcessor() {
                         .addStatement("this.\$N = \$N", "webView", "webView")
                         .build())
 
+                var closuresToPromisify = mutableListOf<String>()
+
                 methods.forEach {
                     val methodElement = it as ExecutableElement
 
@@ -123,6 +126,11 @@ class NimbusProcessor : AbstractProcessor() {
 
                     val arguments = mutableListOf<String>()
                     var argIndex = 0
+
+                    val trailingClosure = methodElement.getAnnotation(ExtensionMethod::class.java).trailingClosure
+                    if (trailingClosure == TrailingClosure.PROMISE) {
+                        closuresToPromisify.add(methodElement.simpleName.toString())
+                    }
 
                     methodElement.parameters.forEach {
 
@@ -179,17 +187,17 @@ class NimbusProcessor : AbstractProcessor() {
                                     argBlock.unindent().add("};\n")
 
                                     invoke.addCode(argBlock.build())
-                                    invoke
-                                            .addCode(
-                                                    CodeBlock.builder()
-                                                            .add("if (webView != null) {\n")
-                                                            .indent()
-                                                            .addStatement("callJavascript(\$N, \$S, \$N, null)", "webView", "nimbus.callCallback2", "args")
-                                                            .unindent()
-                                                            .add("}\n")
-                                                            .addStatement("return null")
-                                                            .build()
-                                            )
+                                    var javascriptMethodToCall = if (trailingClosure == TrailingClosure.PROMISE) "nimbus.resolvePromise" else "nimbus.callCallback2"
+                                    invoke.addCode(
+                                            CodeBlock.builder()
+                                                    .add("if (webView != null) {\n")
+                                                    .indent()
+                                                    .addStatement("callJavascript(\$N, \$S, \$N, null)", "webView", javascriptMethodToCall, "args")
+                                                    .unindent()
+                                                    .add("}\n")
+                                                    .addStatement("return null")
+                                                    .build()
+                                    )
 
                                     val typeArgs = declaredType.typeArguments.map {
                                         if (it.kind == TypeKind.WILDCARD) {
@@ -252,30 +260,22 @@ class NimbusProcessor : AbstractProcessor() {
                     val argsString = arguments.joinToString(", ")
                     when (it.returnType.kind) {
                         TypeKind.VOID -> {
-                            methodSpec.addStatement("target.\$N($argsString)", it.simpleName.toString())
+                            if (trailingClosure == TrailingClosure.PROMISE) {
+                                addReturnStatementToMethod(it, methodSpec, argsString, true)
+                            } else {
+                                methodSpec.addStatement("target.\$N($argsString)", it.simpleName.toString())
+                            }
                         }
                         TypeKind.DECLARED -> {
-
-                            if (it.returnType.toString().equals("java.lang.String")) {
-                                methodSpec.addStatement("return \$T.quote(target.\$N($argsString))",
-                                    ClassName.get("org.json", "JSONObject"),
-                                    it.simpleName.toString())
+                            if (trailingClosure == TrailingClosure.PROMISE) {
+                                throw Exception("Method with closure to be promisified can not have a return type")
                             } else {
-
-                                val supertypes = processingEnv.typeUtils.directSupertypes(it.returnType)
-                                var found = false
-                                for (supertype in supertypes) {
-                                    if (supertype.toString().equals("com.salesforce.nimbus.JSONSerializable")) {
-                                        found = true
-                                    }
-                                }
-
-                                if (found) {
-                                    methodSpec.returns(String::class.java)
-                                    methodSpec.addStatement("return target.\$N($argsString).stringify()", it.simpleName.toString())
+                                if (it.returnType.toString().equals("java.lang.String")) {
+                                    methodSpec.addStatement("return \$T.quote(target.\$N($argsString))",
+                                        ClassName.get("org.json", "JSONObject"),
+                                        it.simpleName.toString())
                                 } else {
-                                    // TODO: should we even allow this? what should the behavior be?
-                                    methodSpec.addStatement("return target.\$N($argsString)", it.simpleName.toString())
+                                    addReturnStatementToMethod(it, methodSpec, argsString, false)
                                 }
                             }
                         }
@@ -285,6 +285,26 @@ class NimbusProcessor : AbstractProcessor() {
                         }
                     }
 
+                    type.addMethod(methodSpec.build())
+                }
+
+                if (closuresToPromisify.count() > 0) {
+                    val methodSpec = MethodSpec.methodBuilder("getExtensionMetadata")
+                            .addAnnotation(
+                                    AnnotationSpec.builder(ClassName.get("android.webkit", "JavascriptInterface"))
+                                            .build())
+                            .addModifiers(Modifier.PUBLIC)
+                            .addException(TypeName.get(JSONException::class.java))
+                            .returns(TypeName.get(String::class.java))
+
+                    methodSpec.addStatement("java.util.List<String> closureNames = new java.util.ArrayList<>()")
+                    closuresToPromisify.forEach { it ->
+                        methodSpec.addStatement("closureNames.add(\"\$N\")", it)
+                    }
+                    methodSpec.addStatement("org.json.JSONObject jsonObject = new org.json.JSONObject()")
+                    methodSpec.addStatement("org.json.JSONArray jsonArray = new org.json.JSONArray(closureNames)")
+                    methodSpec.addStatement("jsonObject.put(\"trailingClosuresAsPromises\", jsonArray)")
+                    methodSpec.addStatement("return jsonObject.toString()")
                     type.addMethod(methodSpec.build())
                 }
 
@@ -315,5 +335,27 @@ class NimbusProcessor : AbstractProcessor() {
             message,
             element
         )
+    }
+
+    private fun addReturnStatementToMethod(element: ExecutableElement, methodSpec: MethodSpec.Builder, argsString: String, isPromise: Boolean) {
+        val supertypes = processingEnv.typeUtils.directSupertypes(element.returnType)
+        val found = supertypes.any { supertype -> supertype.toString().equals("com.salesforce.nimbus.JSONSerializable") }
+        val statement: String
+        if (found) {
+            methodSpec.returns(String::class.java)
+            if (isPromise) {
+                statement = "target.\$N($argsString).stringify()"
+            } else {
+                statement = "return target.\$N($argsString).stringify()"
+            }
+        } else {
+            // TODO: should we even allow this? what should the behavior be?
+            if (isPromise) {
+                statement = "target.\$N($argsString)"
+            } else {
+                statement = "return target.\$N($argsString)"
+            }
+        }
+        methodSpec.addStatement(statement, element.simpleName)
     }
 }
