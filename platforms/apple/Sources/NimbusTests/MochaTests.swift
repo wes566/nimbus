@@ -5,15 +5,9 @@
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 //
 
-// swiftlint:disable line_length file_length
-
 import Nimbus
 import WebKit
 import XCTest
-
-enum PromiseRejectError: Error, Equatable {
-    case rejected
-}
 
 class MochaTests: XCTestCase, WKNavigationDelegate {
     struct MochaMessage: Encodable {
@@ -86,7 +80,11 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
 
         loadWebViewAndWait()
 
-        webView.evaluateJavaScript("mocha.run(failures => { mochaTestBridge.testsCompleted(failures); }).on('fail', (test, err) => mochaTestBridge.onTestFail(test.title, err.message)); true;") { _, error in
+        webView.evaluateJavaScript("""
+            mocha.run(failures => { mochaTestBridge.testsCompleted(failures); })
+                 .on('fail', (test, err) => mochaTestBridge.onTestFail(test.title, err.message));
+            true;
+            """) { _, error in
 
             if let error = error {
                 XCTFail(error.localizedDescription)
@@ -119,30 +117,6 @@ public class CallbackTestExtension {
     func callbackWithPrimitiveAndUddtParams(completion: @escaping (Int, MochaTests.MochaMessage) -> Swift.Void) {
         completion(777, MochaTests.MochaMessage())
     }
-    func promiseWithNoParameter(completion: @escaping () -> Swift.Void) {
-        completion()
-    }
-    func promiseWithPrimitive(completion: @escaping (String) -> Swift.Void) {
-        completion("one")
-    }
-    func promiseWithDictionaryParam(completion: @escaping(MochaTests.MochaMessage) -> Swift.Void) {
-        var mochaMessage = MochaTests.MochaMessage()
-        mochaMessage.intField = 6
-        mochaMessage.stringField = "int param is 6"
-        completion(mochaMessage)
-    }
-    func promiseWithMultipleParamsAndDictionaryParam(param0: Int, param1: String, completion: @escaping(MochaTests.MochaMessage) -> Swift.Void) {
-        var mochaMessage = MochaTests.MochaMessage()
-        mochaMessage.intField = param0
-        mochaMessage.stringField = param1
-        completion(mochaMessage)
-    }
-    func promiseRejects(completion: @escaping (MochaTests.MochaMessage) -> Swift.Void) throws {
-        throw PromiseRejectError.rejected
-    }
-    func promiseWithMultipleParamsRejects(param0: Int, param1: Int, completion: @escaping (MochaTests.MochaMessage) -> Swift.Void) throws {
-        throw PromiseRejectError.rejected
-    }
 }
 
 extension CallbackTestExtension: NimbusExtension {
@@ -153,11 +127,5 @@ extension CallbackTestExtension: NimbusExtension {
         connection.bind(CallbackTestExtension.callbackWithSinglePrimitiveParam, as: "callbackWithSinglePrimitiveParam")
         connection.bind(CallbackTestExtension.callbackWithTwoPrimitiveParams, as: "callbackWithTwoPrimitiveParams")
         connection.bind(CallbackTestExtension.callbackWithPrimitiveAndUddtParams, as: "callbackWithPrimitiveAndUddtParams")
-        connection.bind(CallbackTestExtension.promiseWithNoParameter, as: "promiseWithNoParameter", trailingClosure: .promise)
-        connection.bind(CallbackTestExtension.promiseWithPrimitive, as: "promiseWithPrimitive", trailingClosure: .promise)
-        connection.bind(CallbackTestExtension.promiseWithDictionaryParam, as: "promiseWithDictionaryParam", trailingClosure: .promise)
-        connection.bind(CallbackTestExtension.promiseWithMultipleParamsAndDictionaryParam, as: "promiseWithMultipleParamsAndDictionaryParam", trailingClosure: .promise)
-        connection.bind(CallbackTestExtension.promiseRejects, as: "promiseRejects", trailingClosure: .promise)
-        connection.bind(CallbackTestExtension.promiseWithMultipleParamsRejects, as: "promiseWithMultipleParamsRejects", trailingClosure: .promise)
     }
 }
