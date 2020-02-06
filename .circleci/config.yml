@@ -20,18 +20,33 @@ jobs:
           name: Set Ruby Version
           command: echo "ruby-2.5.3" > ~/.ruby-version
 
-      - run:
-          name: Fetch CocoaPods Specs
-          command: |
-            curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+      - restore_cache:
+          keys:
+            - v1-pods-{{ checksum "platforms/apple/Podfile.lock" }}
+            - v1-pods
+
+      - restore_cache:
+          keys:
+            - v1-bundler-{{ checksum "platforms/apple/Gemfile.lock" }}
+            - v1-bundler
 
       - run:
           name: CocoaPods
           working_directory: platforms/apple
           command: |
             gem install bundler -v 2.0.1
-            bundle install
+            bundle install --path .bundle
             bundle exec pod install
+
+      - save_cache:
+          paths:
+            - ./platforms/apple/Pods
+          key: v1-pods-{{ checksum "platforms/apple/Podfile.lock" }}
+
+      - save_cache:
+          paths:
+            - ./platforms/apple/.bundle
+          key: v1-bundler-{{ checksum "platforms/apple/Gemfile.lock" }}
 
       - run:
           name: Build macOS
@@ -43,7 +58,7 @@ jobs:
           working_directory: platforms/apple
           command: |
             xcodebuild build -workspace Nimbus.xcworkspace -scheme 'Generate Code from Templates'
-            git diff-index --quiet HEAD
+            git diff-index --quiet HEAD Sources
 
   build-swiftpm:
     macos:
@@ -79,18 +94,33 @@ jobs:
           name: Set Ruby Version
           command: echo "ruby-2.5.3" > ~/.ruby-version
 
-      - run:
-          name: Fetch CocoaPods Specs
-          command: |
-            curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+      - restore_cache:
+          keys:
+            - v1-pods-{{ checksum "platforms/apple/Podfile.lock" }}
+            - v1-pods
+
+      - restore_cache:
+          keys:
+            - v1-bundler-{{ checksum "platforms/apple/Gemfile.lock" }}
+            - v1-bundler
 
       - run:
           name: CocoaPods
           working_directory: platforms/apple
           command: |
             gem install bundler -v 2.0.1
-            bundle install
+            bundle install --path .bundle
             bundle exec pod install
+
+      - save_cache:
+          paths:
+            - ./platforms/apple/Pods
+          key: v1-pods-{{ checksum "platforms/apple/Podfile.lock" }}
+
+      - save_cache:
+          paths:
+            - ./platforms/apple/.bundle
+          key: v1-bundler-{{ checksum "platforms/apple/Gemfile.lock" }}
 
       - run:
           name: Build iOS
@@ -120,9 +150,23 @@ jobs:
             npm install
             ./create-nimbus-js.sh
 
-      - store_artifacts:
-          path: NimbusJS.zip
-          destination: NimbusJS.zip
+      - persist_to_workspace:
+          root: .
+          paths:
+            - NimbusJS.zip
+
+  create-tagged-release:
+    docker:
+      - image: cibuilds/github:0.10
+
+    steps:
+      - attach_workspace:
+          at: workspace
+
+      - run:
+          name: "Create GitHub Release"
+          command: |
+            ghr -t ${HYPE_GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ./workspace/NimbusJS.zip
 
   build-and-test-android:
     docker:
@@ -185,3 +229,11 @@ workflows:
       - build-swiftpm
       - build-and-test-android
       - build-and-test-ts
+      - create-tagged-release:
+          requires:
+            - build-and-test-ios
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
