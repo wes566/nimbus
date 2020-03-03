@@ -17,6 +17,8 @@ enum FormattingPurpose {
     case forBoundFunctionArgs
     case forMethodArgsAsIntDecl
     case forArgsSum
+    case forWhereClause
+    case forMethodArgsAsDecodableStruct
 }
 
 enum FormattingBinaryCallback {
@@ -56,6 +58,12 @@ func getCommaSeparatedString(count: Int, formattingPurpose: FormattingPurpose) -
     case .forArgsSum:
         // example: "arg0 + arg1 + arg2 + arg3 ...."
         return argIndices.map({(element: Int) in String.init(format: "arg%d", element)}).joined(separator: " + ")
+    case .forWhereClause:
+        // example "where A0: Decodable, A1: Decodable ...."
+        return " where " + argIndices.map({(element: Int) in String.init("A\(element): Decodable")}).joined(separator: ", ")
+    case .forMethodArgsAsDecodableStruct:
+        // example "arg0: TestableDecodableStruct, arg1: TestableDecodableStruct ..."
+        return argIndices.map({(element: Int) in String.init(format: "arg%d: TestableDecodableStruct", element)}).joined(separator: ", ")
     }
 }
 
