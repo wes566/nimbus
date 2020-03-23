@@ -19,11 +19,5 @@ public protocol Plugin: class {
      to the web view, make additional configuration changes to the web view, or
      call additional methods on the nimbus bridge prior to the web app being loaded.
      */
-    func bind(to webView: WKWebView, bridge: NimbusBridge)
-}
-
-extension Plugin where Self: NimbusExtension {
-    public func bind(to webView: WKWebView, bridge: NimbusBridge) {
-        bindToWebView(webView: webView)
-    }
+    func bind(to webView: WKWebView, bridge: Bridge)
 }
