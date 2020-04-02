@@ -71,13 +71,14 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
 
     func testExecuteMochaTests() {
         let testBridge = MochaTestBridge(webView: webView)
-        let connection = webView.addConnection(to: testBridge, as: "mochaTestBridge")
+        let connection = WebViewConnection(from: webView, as: "mochaTestBridge")
         connection.bind(testBridge.testsCompleted, as: "testsCompleted")
         connection.bind(testBridge.ready, as: "ready")
         connection.bind(testBridge.sendMessage, as: "sendMessage")
         connection.bind(testBridge.onTestFail, as: "onTestFail")
         let callbackTestPlugin = CallbackTestPlugin()
-        callbackTestPlugin.bind(to: webView, bridge: Bridge())
+        let callbackConnection = WebViewConnection(from: webView, as: callbackTestPlugin.namespace)
+        callbackTestPlugin.bind(to: callbackConnection)
 
         loadWebViewAndWait()
 
@@ -88,9 +89,9 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
             true;
             """) { _, error in
 
-            if let error = error {
-                XCTFail(error.localizedDescription)
-            }
+                if let error = error {
+                    XCTFail(error.localizedDescription)
+                }
         }
 
         wait(for: [testBridge.expectation], timeout: 30)
@@ -121,8 +122,11 @@ public class CallbackTestPlugin {
 }
 
 extension CallbackTestPlugin: Plugin {
-    public func bind(to webView: WKWebView, bridge: Bridge) {
-        let connection = webView.addConnection(to: self, as: "callbackTestPlugin")
+    public var namespace: String {
+        return "callbackTestPlugin"
+    }
+
+    public func bind<C>(to connection: C) where C: Connection {
         connection.bind(self.callbackWithSingleParam, as: "callbackWithSingleParam")
         connection.bind(self.callbackWithTwoParams, as: "callbackWithTwoParams")
         connection.bind(self.callbackWithSinglePrimitiveParam, as: "callbackWithSinglePrimitiveParam")

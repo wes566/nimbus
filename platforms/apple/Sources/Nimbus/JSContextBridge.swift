@@ -5,5 +5,15 @@
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 //
 
-public protocol Connection: class, Binder {
+import Foundation
+import JavaScriptCore
+
+public class JSContextBridge {
+    public func addPlugin<T: Plugin>(_ plugin: T) {
+        // TODO:
+    }
+
+    public func attach(to context: JSContext) {
+        // TODO:
+    }
 }

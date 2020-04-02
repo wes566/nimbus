@@ -64,8 +64,8 @@ public class DeviceInfoPlugin {
 }
 
 extension DeviceInfoPlugin: Plugin {
-    public func bind(to webView: WKWebView, bridge: Bridge) {
-        let connection = webView.addConnection(to: self, as: "DeviceInfoPlugin")
+    public func bind<C>(to connection: C) where C: Connection {
         connection.bind(self.getDeviceInfo, as: "getDeviceInfo")
     }
+
 }
