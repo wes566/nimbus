@@ -42,6 +42,8 @@
 		29F8D60F223AF857005C5AC1 /* DeviceInfoPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F8D60E223AF857005C5AC1 /* DeviceInfoPlugin.swift */; };
 		682D46B5234160650049B636 /* CallableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682D46B4234160650049B636 /* CallableTests.swift */; };
 		68B855F2233EE7FD00D1F243 /* BinderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B855F1233EE7FD00D1F243 /* BinderTests.swift */; };
+		CC216514243C00AE000DC5D3 /* JSValueDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC216513243C00AE000DC5D3 /* JSValueDecoder.swift */; };
+		CC216516243C0395000DC5D3 /* JSValueDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC216515243C0395000DC5D3 /* JSValueDecoderTests.swift */; };
 		CC251496240D6764001E8D8C /* DecodableUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC251495240D6764001E8D8C /* DecodableUtils.swift */; };
 		CC251498240D6C13001E8D8C /* DecodableUtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC251497240D6C13001E8D8C /* DecodableUtilsTests.swift */; };
 		CC355C0B24367CC200E5FDEE /* PluginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC355C0A24367CC200E5FDEE /* PluginTests.swift */; };
@@ -55,6 +57,8 @@
 		CC97225223E4834400F899E7 /* NimbusJS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC97223D23E4834400F899E7 /* NimbusJS.framework */; };
 		CC97225323E4834400F899E7 /* NimbusJS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CC97223D23E4834400F899E7 /* NimbusJS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CC97225C23E4847C00F899E7 /* WebView+NimbusJS.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97225A23E4847500F899E7 /* WebView+NimbusJS.swift */; };
+		CCDEEEAB2440C164009ADEBC /* JSValueEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCDEEEAA2440C164009ADEBC /* JSValueEncoder.swift */; };
+		CCEA62CB243F83B000664E7E /* JSValueEncoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCEA62CA243F83B000664E7E /* JSValueEncoderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -197,6 +201,8 @@
 		63718927281C4CF800BD8064 /* Pods-Nimbus.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Nimbus.debug.xcconfig"; path = "Target Support Files/Pods-Nimbus/Pods-Nimbus.debug.xcconfig"; sourceTree = "<group>"; };
 		682D46B4234160650049B636 /* CallableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallableTests.swift; sourceTree = "<group>"; };
 		68B855F1233EE7FD00D1F243 /* BinderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinderTests.swift; sourceTree = "<group>"; };
+		CC216513243C00AE000DC5D3 /* JSValueDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSValueDecoder.swift; sourceTree = "<group>"; };
+		CC216515243C0395000DC5D3 /* JSValueDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSValueDecoderTests.swift; sourceTree = "<group>"; };
 		CC251495240D6764001E8D8C /* DecodableUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodableUtils.swift; sourceTree = "<group>"; };
 		CC251497240D6C13001E8D8C /* DecodableUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodableUtilsTests.swift; sourceTree = "<group>"; };
 		CC355C0A24367CC200E5FDEE /* PluginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginTests.swift; sourceTree = "<group>"; };
@@ -211,6 +217,8 @@
 		CC97224C23E4834400F899E7 /* NimbusJSTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NimbusJSTests.swift; sourceTree = "<group>"; };
 		CC97224E23E4834400F899E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC97225A23E4847500F899E7 /* WebView+NimbusJS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "WebView+NimbusJS.swift"; sourceTree = "<group>"; };
+		CCDEEEAA2440C164009ADEBC /* JSValueEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSValueEncoder.swift; sourceTree = "<group>"; };
+		CCEA62CA243F83B000664E7E /* JSValueEncoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSValueEncoderTests.swift; sourceTree = "<group>"; };
 		D0FE94B18F9A6066886945B1 /* Pods-Nimbus.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Nimbus.release.xcconfig"; path = "Target Support Files/Pods-Nimbus/Pods-Nimbus.release.xcconfig"; sourceTree = "<group>"; };
 		F0639DA54032B895278BC4F0 /* libPods-Nimbus.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Nimbus.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -352,6 +360,8 @@
 				294433442200FA3700E6D084 /* EncodableValue.swift */,
 				CC430D8E24339B0400CA12A0 /* JSContextBridge.swift */,
 				CC430D942433C8EF00CA12A0 /* JSContextConnection.swift */,
+				CC216513243C00AE000DC5D3 /* JSValueDecoder.swift */,
+				CCDEEEAA2440C164009ADEBC /* JSValueEncoder.swift */,
 				29264F5D24197E4F00D68664 /* Plugin.swift */,
 				CC430D902433C39800CA12A0 /* WebViewConnection.swift */,
 				294433432200FA3700E6D084 /* WebView+Nimbus.swift */,
@@ -370,6 +380,8 @@
 				2944335F2200FE3400E6D084 /* CallJavascriptTests.swift */,
 				CC251497240D6C13001E8D8C /* DecodableUtilsTests.swift */,
 				2922900E241165570014B95A /* InvocationTests.swift */,
+				CC216515243C0395000DC5D3 /* JSValueDecoderTests.swift */,
+				CCEA62CA243F83B000664E7E /* JSValueEncoderTests.swift */,
 				29245EE1220CE13000F9EEAF /* MochaTests.swift */,
 				29F3839B234BC61000BF854B /* ParameterErrorTests.swift */,
 				CC355C0A24367CC200E5FDEE /* PluginTests.swift */,
@@ -927,7 +939,9 @@
 				294433482200FA3700E6D084 /* WebView+Nimbus.swift in Sources */,
 				2944334B2200FA3700E6D084 /* Connection.swift in Sources */,
 				294433492200FA3700E6D084 /* EncodableValue.swift in Sources */,
+				CCDEEEAB2440C164009ADEBC /* JSValueEncoder.swift in Sources */,
 				CC251496240D6764001E8D8C /* DecodableUtils.swift in Sources */,
+				CC216514243C00AE000DC5D3 /* JSValueDecoder.swift in Sources */,
 				294433472200FA3700E6D084 /* Callback.swift in Sources */,
 				2944334A2200FA3700E6D084 /* Callable.swift in Sources */,
 				29264F5E24197E4F00D68664 /* Plugin.swift in Sources */,
@@ -941,6 +955,8 @@
 				29F3839C234BC61000BF854B /* ParameterErrorTests.swift in Sources */,
 				29245EE2220CE13000F9EEAF /* MochaTests.swift in Sources */,
 				29DA183E220E32E600D02CDA /* CallJavascriptTests.swift in Sources */,
+				CCEA62CB243F83B000664E7E /* JSValueEncoderTests.swift in Sources */,
+				CC216516243C0395000DC5D3 /* JSValueDecoderTests.swift in Sources */,
 				682D46B5234160650049B636 /* CallableTests.swift in Sources */,
 				2922900F241165570014B95A /* InvocationTests.swift in Sources */,
 				68B855F2233EE7FD00D1F243 /* BinderTests.swift in Sources */,

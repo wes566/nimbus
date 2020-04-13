@@ -1,0 +1,464 @@
+//
+// Copyright (c) 2019, Salesforce.com, inc.
+// All rights reserved.
+// SPDX-License-Identifier: BSD-3-Clause
+// For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+//
+
+// swiftlint:disable file_length
+
+import JavaScriptCore
+
+class JSValueEncoder {
+    public func encode<T>(_ value: T, context: JSContext) throws -> JSValue where T: Encodable {
+        let encoder = JSValueEncoderContainer(context: context)
+        try value.encode(to: encoder)
+        return encoder.resolvedValue()
+    }
+}
+
+enum JSValueEncoderError: Error {
+    case invalidContext
+}
+
+struct JSValueEncoderStorage {
+    var jsValueContainers: [JSValue] = []
+    let context: JSContext
+    var count: Int {
+        return jsValueContainers.count
+    }
+
+    init(context: JSContext) {
+        self.context = context
+    }
+
+    mutating func push(container: __owned Any) {
+        self.jsValueContainers.append(JSValue(object: container, in: self.context))
+    }
+
+    mutating func pushUnKeyedContainer() throws -> JSValue {
+        guard let jsArray = JSValue(newArrayIn: self.context) else {
+            throw JSValueEncoderError.invalidContext
+        }
+        self.jsValueContainers.append(jsArray)
+        return jsArray
+    }
+
+    mutating func pushKeyedContainer() throws -> JSValue {
+        guard let jsDictionary = JSValue(newObjectIn: self.context) else {
+            throw JSValueEncoderError.invalidContext
+        }
+        self.jsValueContainers.append(jsDictionary)
+        return jsDictionary
+    }
+
+    mutating func popContainer() -> JSValue {
+        precondition(!self.jsValueContainers.isEmpty, "Empty container stack.")
+        return self.jsValueContainers.popLast()!
+    }
+}
+
+class JSValueEncoderContainer: Encoder {
+    var codingPath: [CodingKey] = []
+    var userInfo: [CodingUserInfoKey: Any] = [:]
+    var storage: JSValueEncoderStorage
+    let context: JSContext
+
+    init(context: JSContext) {
+        self.context = context
+        self.storage = JSValueEncoderStorage(context: context)
+    }
+
+    func resolvedValue() -> JSValue {
+        if storage.count == 1, let main = storage.jsValueContainers.first {
+            return main
+        }
+        return JSValue(object: storage.jsValueContainers, in: context)
+    }
+
+    public func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key: CodingKey {
+        let containerStorage = (try? storage.pushKeyedContainer()) ?? JSValue(newObjectIn: context)
+        let container = JSValueKeyedEncodingContainer<Key>(encoder: self, container: containerStorage, codingPath: codingPath)
+        return KeyedEncodingContainer(container)
+    }
+
+    public func unkeyedContainer() -> UnkeyedEncodingContainer {
+        let containerStorage = (try? storage.pushUnKeyedContainer()) ?? JSValue(newArrayIn: context)
+        let container = JSValueUnkeyedEncodingContainer(encoder: self, container: containerStorage, codingPath: codingPath)
+        return container
+    }
+
+    public func singleValueContainer() -> SingleValueEncodingContainer {
+        return self
+    }
+}
+
+private struct JSValueKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol {
+    let encoder: JSValueEncoderContainer
+    let container: JSValue?
+    var codingPath: [CodingKey]
+
+    init(encoder: JSValueEncoderContainer, container: JSValue?, codingPath: [CodingKey]) {
+        self.encoder = encoder
+        if (container?.isObject ?? false) == true {
+            self.container = container
+        } else {
+            self.container = nil
+        }
+        self.codingPath = codingPath
+    }
+
+    func encodeNil(forKey key: K) throws {
+        container?.append(NSNull(), for: key.stringValue)
+    }
+
+    func encode(_ value: Bool, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: String, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Double, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Float, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Int, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Int8, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Int16, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Int32, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: Int64, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: UInt, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: UInt8, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: UInt16, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: UInt32, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode(_ value: UInt64, forKey key: K) throws {
+        container?.append(value, for: key.stringValue)
+    }
+
+    func encode<T>(_ value: T, forKey key: K) throws where T: Encodable {
+        self.encoder.codingPath.append(key)
+        defer { self.encoder.codingPath.removeLast() }
+        let depth = encoder.storage.count
+        do {
+            try value.encode(to: encoder)
+        } catch {
+            if encoder.storage.count > depth {
+                _ = encoder.storage.popContainer()
+            }
+            throw error
+        }
+
+        guard encoder.storage.count > depth else {
+            return
+        }
+        container?.append(encoder.storage.popContainer(), for: key.stringValue)
+    }
+
+    mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: K) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey { // swiftlint:disable:this line_length
+        let containerKey = key.stringValue
+        let dictionary: JSValue
+        if let existingContainer = container?.objectForKeyedSubscript(containerKey) {
+            precondition(
+                existingContainer.isObject,
+                "Attempt to re-encode into nested KeyedEncodingContainer<\(Key.self)> for key \"\(containerKey)\" is invalid: non-keyed container already encoded for this key"
+            )
+            dictionary = existingContainer
+        } else {
+            dictionary = JSValue(newObjectIn: encoder.context)
+            self.container?.append(dictionary, for: containerKey)
+        }
+
+        self.codingPath.append(key)
+        defer { self.codingPath.removeLast() }
+
+        let container = JSValueKeyedEncodingContainer<NestedKey>(encoder: self.encoder, container: dictionary, codingPath: self.codingPath)
+        return KeyedEncodingContainer(container)
+    }
+
+    mutating func nestedUnkeyedContainer(forKey key: K) -> UnkeyedEncodingContainer {
+        let containerKey = key.stringValue
+        let array: JSValue
+        if let existingContainer = container?.objectForKeyedSubscript(containerKey) {
+            precondition(
+                existingContainer.isArray,
+                "Attempt to re-encode into nested UnkeyedEncodingContainer for key \"\(containerKey)\" is invalid: keyed container/single value already encoded for this key"
+            )
+            array = existingContainer
+        } else {
+            array = JSValue(newArrayIn: encoder.context)
+            self.container?.append(array, for: containerKey)
+        }
+
+        self.codingPath.append(key)
+        defer { self.codingPath.removeLast() }
+        return JSValueUnkeyedEncodingContainer(encoder: self.encoder, container: array, codingPath: self.codingPath)
+    }
+
+    func superEncoder() -> Encoder {
+        return JSValueEncoderContainer(context: JSContext())
+    }
+
+    func superEncoder(forKey key: K) -> Encoder {
+        return JSValueEncoderContainer(context: JSContext())
+    }
+
+    typealias Key = K
+
+}
+
+private struct JSValueUnkeyedEncodingContainer: UnkeyedEncodingContainer {
+    let encoder: JSValueEncoderContainer
+    let container: JSValue?
+    var codingPath: [CodingKey]
+    var count: Int
+
+    init(encoder: JSValueEncoderContainer, container: JSValue?, codingPath: [CodingKey]) {
+        self.encoder = encoder
+        if (container?.isArray ?? false) == true {
+            self.container = container
+        } else {
+            self.container = nil
+        }
+        self.codingPath = codingPath
+        count = 0
+    }
+
+    func encode(_ value: String) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Double) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Float) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Int) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Int8) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Int16) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Int32) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: Int64) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: UInt) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: UInt8) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: UInt16) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: UInt32) throws {
+        container?.append(value)
+    }
+
+    func encode(_ value: UInt64) throws {
+        container?.append(value)
+    }
+
+    func encode<T>(_ value: T) throws where T: Encodable {
+        self.encoder.codingPath.append(JSValueKey(index: self.count))
+        defer { self.encoder.codingPath.removeLast() }
+        container?.append(value)
+    }
+
+    func encode(_ value: Bool) throws {
+        container?.append(value)
+    }
+
+    func encodeNil() throws {
+        container?.append(NSNull())
+    }
+
+    mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
+        self.codingPath.append(JSValueKey(index: self.count))
+        defer { self.codingPath.removeLast() }
+
+        let dictionary = JSValue(newObjectIn: encoder.context)
+        if let dictionary = dictionary {
+            self.container?.append(dictionary)
+        }
+
+        let container = JSValueKeyedEncodingContainer<NestedKey>(encoder: encoder, container: dictionary, codingPath: codingPath)
+        return KeyedEncodingContainer(container)
+    }
+
+    mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
+        self.codingPath.append(JSValueKey(index: self.count))
+        defer { self.codingPath.removeLast() }
+
+        let array = JSValue(newArrayIn: encoder.context)
+        if let array = array {
+            self.container?.append(array)
+        }
+        return JSValueUnkeyedEncodingContainer(encoder: encoder, container: array, codingPath: codingPath)
+    }
+
+    func superEncoder() -> Encoder {
+        return JSValueEncoderContainer(context: JSContext())
+    }
+}
+
+extension JSValueEncoderContainer: SingleValueEncodingContainer {
+    func encodeNil() throws {
+        storage.push(container: NSNull())
+    }
+
+    func encode(_ value: Bool) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: String) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Double) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Float) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Int) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Int8) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Int16) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Int32) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: Int64) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: UInt) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: UInt8) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: UInt16) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: UInt32) throws {
+        storage.push(container: value)
+    }
+
+    func encode(_ value: UInt64) throws {
+        storage.push(container: value)
+    }
+
+    func encode<T>(_ value: T) throws where T: Encodable {
+        storage.push(container: value)
+    }
+
+}
+
+private struct JSValueKey: CodingKey {
+    public var stringValue: String
+    public var intValue: Int?
+
+    public init?(stringValue: String) {
+        self.stringValue = stringValue
+        self.intValue = nil
+    }
+
+    public init?(intValue: Int) {
+        self.stringValue = "\(intValue)"
+        self.intValue = intValue
+    }
+
+    public init(stringValue: String, intValue: Int?) {
+        self.stringValue = stringValue
+        self.intValue = intValue
+    }
+
+    init(index: Int) {
+        self.stringValue = "Index \(index)"
+        self.intValue = index
+    }
+
+    static let `super` = JSValueKey(stringValue: "super")!
+}
+
+extension JSValue {
+    func push(_ values: [Any]) {
+        self.invokeMethod("push", withArguments: values)
+    }
+
+    func append(_ value: Any) {
+        if let value = JSValue(object: value, in: context) {
+            push([value])
+        }
+    }
+
+    func append(_ value: Any, for key: String) {
+        if let value = JSValue(object: value, in: context) {
+            self.setObject(value, forKeyedSubscript: key)
+        }
+    }
+}

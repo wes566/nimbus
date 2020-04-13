@@ -32,8 +32,7 @@ class InvocationTests: XCTestCase, WKNavigationDelegate {
 
         if let url = Bundle(for: InvocationTests.self).url(forResource: "index", withExtension: "html", subdirectory: "test-www") {
             webView.loadFileURL(url, allowingReadAccessTo: url)
-        }
-        else {
+        } else {
             // when running from swiftpm, look for the file relative to the source root
             let basepath = URL(fileURLWithPath: #file)
             let url = URL(fileURLWithPath: "../../../../packages/test-www/dist/test-www/index.html", relativeTo: basepath)
