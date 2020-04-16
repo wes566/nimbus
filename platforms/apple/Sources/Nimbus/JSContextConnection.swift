@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019, Salesforce.com, inc.
+// Copyright (c) 2020, Salesforce.com, inc.
 // All rights reserved.
 // SPDX-License-Identifier: BSD-3-Clause
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
@@ -13,6 +13,13 @@ public class JSContextConnection: Connection {
         self.context = context
         self.namespace = namespace
         self.promiseGlobal = context.objectForKeyedSubscript("Promise")
+        let plugins = context.objectForKeyedSubscript("__nimbus")?.objectForKeyedSubscript("plugins")
+        var connection = plugins?.objectForKeyedSubscript(namespace)
+        if connection?.isUndefined == true {
+            connection = JSValue.init(newObjectIn: context)
+            plugins?.setObject(connection, forKeyedSubscript: namespace)
+        }
+        self.connectionValue = connection
     }
 
     public func bind(_ callable: Callable, as name: String) {
@@ -20,40 +27,48 @@ public class JSContextConnection: Connection {
             return
         }
         bindings[name] = callable
-
-        // create an objc block
         let binding: @convention(block) () -> Any? = {
-            let args = JSContext.currentArguments()
+            let args: [Any] = JSContext.currentArguments() ?? []
+            let mappedArgs = args.map { arg -> Any in
+                if let jsArg = arg as? JSValue, jsArg.isFunction() {
+                    return JSValueCallback(callback: jsArg)
+                }
+                return arg
+            }
             do {
-                let result = try callable.call(args: args ?? [])
-                return self.promiseGlobal?.invokeMethod("resolve", withArguments: [result])
+                var resultArguments: [Any] = []
+                let rawResult = try callable.call(args: mappedArgs)
+                if type(of: rawResult) as? Encodable.Type != nil {
+                    let encodableResult = rawResult as! Encodable // swiftlint:disable:this force_cast
+                    resultArguments.append(try encodableResult.toJSValue(context: context))
+                } else if type(of: rawResult) != Void.self {
+                    throw ParameterError.conversion
+                }
+                return self.promiseGlobal?.invokeMethod("resolve", withArguments: resultArguments)
             } catch {
                 return self.promiseGlobal?.invokeMethod("reject", withArguments: [])
             }
         }
 
-        // bind the block as name
-        context.globalObject.setObject(binding, forKeyedSubscript: name)
-
-        let assignmentJS = """
-        var plugin = __nimbus.plugins["\(namespace)"];
-        if (plugin === undefined) {
-            plugin = {};
-            __nimbus.plugins["\(namespace)"] = plugin;
-        }
-        __nimbus.plugins.\(namespace)["\(name)"] = \(name);
-        delete \(name);
-        """
-
-        context.evaluateScript(assignmentJS)
-    }
-
-    public func call(_ method: String, args: [Any], promise: String) {
-        // TODO:
+        connectionValue?.setObject(binding, forKeyedSubscript: name)
     }
 
     private let namespace: String
     private weak var context: JSContext?
     private var bindings: [String: Callable] = [:]
     private let promiseGlobal: JSValue?
+    private let connectionValue: JSValue?
+}
+
+extension Encodable {
+    func toJSValue(context: JSContext) throws -> JSValue {
+        return try JSValueEncoder().encode(self, context: context)
+    }
+}
+
+extension JSValue {
+    func isFunction() -> Bool {
+        let functionType = self.context.globalObject.objectForKeyedSubscript("Function")
+        return self.isInstance(of: functionType)
+    }
 }
