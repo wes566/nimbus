@@ -18,9 +18,10 @@ public class WebViewConnection: Connection {
     /**
      Create a connection from the web view to an object.
      */
-    public init(from webView: WKWebView, as namespace: String) {
+    public init(from webView: WKWebView, bridge: JSEvaluating, as namespace: String) {
         self.webView = webView
         self.namespace = namespace
+        self.bridge = bridge
         let messageHandler = ConnectionMessageHandler(connection: self)
         webView.configuration.userContentController.add(messageHandler, name: namespace)
     }
@@ -72,6 +73,14 @@ public class WebViewConnection: Connection {
 
         let script = WKUserScript(source: stubScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         webView?.configuration.userContentController.addUserScript(script)
+    }
+
+    public func evaluate<R: Decodable>(
+        _ identifierPath: String,
+        with args: [Encodable],
+        callback: @escaping (Error?, R?) -> Void
+    ) {
+        bridge?.evaluate(identifierPath, with: args, callback: callback)
     }
 
     /**
@@ -133,5 +142,6 @@ public class WebViewConnection: Connection {
 
     private let namespace: String
     private weak var webView: WKWebView?
+    private var bridge: JSEvaluating?
     private var bindings: [String: Callable] = [:]
 }

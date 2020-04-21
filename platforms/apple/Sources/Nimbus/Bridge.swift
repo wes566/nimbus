@@ -8,7 +8,7 @@
 import Foundation
 import WebKit
 
-public class Bridge: NSObject {
+public class Bridge: NSObject, JSEvaluating {
     public func addPlugin<T: Plugin>(_ plugin: T) {
         plugins.append(plugin)
     }
@@ -27,7 +27,7 @@ public class Bridge: NSObject {
         #endif
 
         for plugin in plugins {
-            let connection = WebViewConnection(from: webView, as: plugin.namespace)
+            let connection = WebViewConnection(from: webView, bridge: self, as: plugin.namespace)
             plugin.bind(to: connection)
         }
     }
@@ -121,9 +121,9 @@ public class Bridge: NSObject {
      Invokes a Promise-returning Javascript function and call the specified
      promiseCompletion when that Promise resolves or rejects.
      */
-    public func invoke<R>(
+    public func evaluate<R: Decodable>(
         _ identifierPath: String,
-        with args: Encodable...,
+        with args: [Encodable],
         callback: @escaping (Error?, R?) -> Void
     ) {
         let identifierSegments = identifierPath.split(separator: ".").map(String.init)

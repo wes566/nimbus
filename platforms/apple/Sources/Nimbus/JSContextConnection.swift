@@ -9,8 +9,9 @@ import JavaScriptCore
 
 public class JSContextConnection: Connection {
 
-    init(from context: JSContext, as namespace: String) {
+    init(from context: JSContext, bridge: JSEvaluating, as namespace: String) {
         self.context = context
+        self.bridge = bridge
         self.namespace = namespace
         self.promiseGlobal = context.objectForKeyedSubscript("Promise")
         let plugins = context.objectForKeyedSubscript("__nimbus")?.objectForKeyedSubscript("plugins")
@@ -26,7 +27,6 @@ public class JSContextConnection: Connection {
         guard let context = self.context else {
             return
         }
-        bindings[name] = callable
         let binding: @convention(block) () -> Any? = {
             let args: [Any] = JSContext.currentArguments() ?? []
             let mappedArgs = args.map { arg -> Any in
@@ -53,9 +53,17 @@ public class JSContextConnection: Connection {
         connectionValue?.setObject(binding, forKeyedSubscript: name)
     }
 
+    public func evaluate<R: Decodable>(
+        _ identifierPath: String,
+        with args: [Encodable],
+        callback: @escaping (Error?, R?) -> Void
+    ) {
+        bridge?.evaluate(identifierPath, with: args, callback: callback)
+    }
+
     private let namespace: String
     private weak var context: JSContext?
-    private var bindings: [String: Callable] = [:]
+    private var bridge: JSEvaluating?
     private let promiseGlobal: JSValue?
     private let connectionValue: JSValue?
 }
