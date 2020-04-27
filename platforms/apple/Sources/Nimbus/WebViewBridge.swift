@@ -9,11 +9,26 @@
 import Foundation
 import WebKit
 
-public class Bridge: NSObject, JSEvaluating {
+/**
+ A `WebViewBridge` links native functions to a `WKWebView` instance.
+
+ Plugins attached to this instance can interact with javascript executing in the attached `WKWebView`.
+ */
+public class WebViewBridge: NSObject, JSEvaluating {
+    /**
+     Add the plugin to this `WebViewBridge` instance.
+
+     This plugin will be bound to the `WKWebView` when one is attached.
+     */
     public func addPlugin<T: Plugin>(_ plugin: T) {
         plugins.append(plugin)
     }
 
+    /**
+     Attach this instance to the given `WKWebView`.
+
+     All plugins added to this `WebViewBridge` will be bound to the `WKWebView`. If this `WebViewBridge` has already been attached to a `WKWebView`, this function does nothing.
+     */
     public func attach(to webView: WKWebView) {
         guard self.webView == nil else {
             return
@@ -138,7 +153,7 @@ public class Bridge: NSObject, JSEvaluating {
     weak var webView: WKWebView?
 }
 
-extension Bridge: WKScriptMessageHandler {
+extension WebViewBridge: WKScriptMessageHandler {
     public func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let body = message.body as? [String: Any] else { return }
         guard let method = body["method"] as? String else { return }

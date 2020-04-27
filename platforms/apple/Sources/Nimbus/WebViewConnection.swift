@@ -9,7 +9,7 @@
 import WebKit
 
 /**
- A `Connection` links a web view to native functions.
+ A `WebViewConnection` links a web view to native functions.
 
  Each connection can bind multiple functions and expose them under
  a single namespace in JavaScript.
@@ -94,7 +94,7 @@ public class WebViewConnection: Connection, CallableBinder {
                     switch arg {
                     case let dict as NSDictionary:
                         if let callbackId = dict["callbackId"] as? String {
-                            return Callback(webView: webView!, callbackId: callbackId)
+                            return WebViewCallback(webView: webView!, callbackId: callbackId)
                         } else {
                             print("non-callback dictionary")
                         }

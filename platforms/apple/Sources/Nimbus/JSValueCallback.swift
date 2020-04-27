@@ -9,11 +9,24 @@
 import Foundation
 import JavaScriptCore
 
+/**
+ An error describing a failure in a `JSValueCallback`
+ */
 enum JSValueCallbackError: Error {
+    /**
+     The context attached to the callback `JSValue` function was nil
+     */
     case invalidContext
+    /**
+     Invoking the `JSValue` returned nil, indicating the javascript object was not a valid function
+     */
     case invalidCallback
 }
 
+/**
+ `JSValueCallback` is a native proxy to a javascript function that
+ is used for passing callbacks across the bridge.
+ */
 class JSValueCallback: Callable {
     init(callback: JSValue) {
         self.callback = callback
