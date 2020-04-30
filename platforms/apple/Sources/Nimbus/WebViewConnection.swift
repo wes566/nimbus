@@ -56,7 +56,7 @@ public class WebViewConnection: Connection, CallableBinder {
     /**
      Bind the callable object to a function `name` under this conenctions namespace.
      */
-    public func bind(_ callable: Callable, as name: String) {
+    func bindCallable(_ name: String, to callable: @escaping Callable) {
         bindings[name] = callable
         let stubScript = """
         __nimbusPluginExports = window.__nimbusPluginExports || {};
@@ -75,6 +75,70 @@ public class WebViewConnection: Connection, CallableBinder {
         webView?.configuration.userContentController.addUserScript(script)
     }
 
+    func decode<T: Decodable>(_ value: Any?, as type: T.Type) -> Result<T, Error> {
+        var data = value as? Data
+        if data == nil,
+            let string = value as? String {
+            data = string.data(using: .utf8)
+        }
+        if let data = data,
+            let value = try? JSONDecoder().decode(type, from: data) {
+            return .success(value)
+        }
+        if let value = value as? T {
+            return .success(value)
+        }
+        return .failure(DecodeError())
+    }
+
+    func encode<T: Encodable>(_ value: T) -> Result<Any?, Error> {
+        if #available(iOS 13, macOS 10.15, *) {
+            // iOS 13+ and macOS 10.15+ handle encoding non-container values at the top-level
+            return Result {
+                let data = try JSONEncoder().encode(value)
+                return String(data: data, encoding: .utf8)
+            }
+        } else {
+            // on iOS 12 and below, we need to wrap the encodable to ensure the top-level is a container
+            let encodableValue: EncodableValue = .value(value)
+            return Result {
+                let data = try JSONEncoder().encode(encodableValue)
+                return String(data: data, encoding: .utf8)
+            }
+        }
+    }
+
+    func callback<T: Encodable>(from value: Any?, taking argType: T.Type) -> Result<(T) -> Void, Error> {
+        guard
+            let callbackId = value as? String,
+            let webView = self.webView
+        else {
+            return .failure(DecodeError())
+        }
+        let callback = WebViewCallback(webView: webView, callbackId: callbackId)
+        return .success({ [weak self] (value: T) in
+            guard let self = self else { return }
+            guard let result = try? self.encode(value).get() as Any else { return }
+            _ = try? callback.call(args: [result])
+        })
+    }
+
+    func callback<T: Encodable, U: Encodable>(from value: Any?, taking argType: (T.Type, U.Type)) -> Result<(T, U) -> Void, Error> {
+        guard
+            let callbackId = value as? String,
+            let webView = self.webView
+        else {
+            return .failure(DecodeError())
+        }
+        let callback = WebViewCallback(webView: webView, callbackId: callbackId)
+        return .success({ [weak self] (value0: T, value1: U) in
+            guard let self = self else { return }
+            guard let result0 = try? self.encode(value0).get() as Any else { return }
+            guard let result1 = try? self.encode(value1).get() as Any else { return }
+            _ = try? callback.call(args: [result0, result1])
+        })
+    }
+
     public func evaluate<R: Decodable>(
         _ identifierPath: String,
         with args: [Encodable],
@@ -89,51 +153,39 @@ public class WebViewConnection: Connection, CallableBinder {
     public func call(_ method: String, args: [Any], promise: String) {
         if let callable = bindings[method] {
             do {
-                // walk args, converting callbacks into Callables
-                let args = args.map { arg -> Any in
-                    switch arg {
-                    case let dict as NSDictionary:
-                        if let callbackId = dict["callbackId"] as? String {
-                            return WebViewCallback(webView: webView!, callbackId: callbackId)
-                        } else {
-                            print("non-callback dictionary")
-                        }
-                    default:
-                        break
-                    }
-                    return arg
-                }
-
-                // The `callable` here is the generated Callable* struct instantiated when bind() was called.
-                // `args` can be both regular params or `Callback`s which are themselves `Callable`s
-                let rawResult = try callable.call(args: args)
-                var result: EncodableValue
-                if type(of: rawResult) == Void.self {
-                    result = .void
-                } else if let encodable = rawResult as? Encodable {
-                    result = .value(encodable)
-                } else {
-                    throw ParameterError.conversion
-                }
-                resolvePromise(promiseId: promise, result: result)
+                let rawResult = try callable(args)
+                try resolvePromise(promiseId: promise, result: rawResult)
             } catch {
                 rejectPromise(promiseId: promise, error: error)
             }
         }
     }
 
-    private func resolvePromise(promiseId: String, result: Any) {
-        let resultString: String
-        switch result {
-        case is ():
-            resultString = "undefined"
-        case let value as EncodableValue:
-            // swiftlint:disable:next force_try
-            resultString = try! String(data: JSONEncoder().encode(value), encoding: .utf8)!
-        default:
-            fatalError("Unsupported return type \(type(of: result))")
+    private func resolvePromise(promiseId: String, result: Any?) throws {
+        if #available(iOS 13, macOS 10.15, *) {
+            let resultString: String
+            switch result {
+            case is Void:
+                resultString = "undefined"
+            case let value as String:
+                resultString = value
+            default:
+                throw ParameterError.conversion
+            }
+            webView?.evaluateJavaScript("__nimbus.resolvePromise('\(promiseId)', \(resultString));")
+        } else {
+            // on iOS 12 and below, the string will be an encoded `EncodableValue` so peek through and get just the value
+            let resultString: String
+            switch result {
+            case is Void:
+                resultString = "{v: undefined}"
+            case let value as String:
+                resultString = value
+            default:
+                throw ParameterError.conversion
+            }
+            webView?.evaluateJavaScript("__nimbus.resolvePromise('\(promiseId)', \(resultString).v);")
         }
-        webView?.evaluateJavaScript("__nimbus.resolvePromise('\(promiseId)', \(resultString).v);")
     }
 
     private func rejectPromise(promiseId: String, error: Error) {
