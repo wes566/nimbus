@@ -10,6 +10,9 @@ import { expect } from "chai";
 import __nimbus from "nimbus-bridge";
 
 describe("Message Broadcasting", () => {
+  if (window == undefined) {
+    return;
+  }
   it("calls listener when message is broadcast", (done) => {
     let listener = () => {
       __nimbus.unsubscribeMessage("test-message", listener);
