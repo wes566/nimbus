@@ -97,6 +97,9 @@ class MochaTests: XCTestCase, WKNavigationDelegate {
         let callbackTestPlugin = CallbackTestPlugin()
         let callbackConnection = WebViewConnection(from: webView, bridge: WebViewBridge(), as: callbackTestPlugin.namespace)
         callbackTestPlugin.bind(to: callbackConnection)
+        let apiTestPlugin = JSAPITestPlugin()
+        let apiTestConnection = WebViewConnection(from: webView, bridge: WebViewBridge(), as: apiTestPlugin.namespace)
+        apiTestPlugin.bind(to: apiTestConnection)
 
         loadWebViewAndWait()
 
@@ -199,6 +202,9 @@ public class JSContextMochaTests: XCTestCase {
         let callbackTestPlugin = CallbackTestPlugin()
         let callbackConnection = JSContextConnection(from: context, bridge: JSContextBridge(), as: callbackTestPlugin.namespace)
         callbackTestPlugin.bind(to: callbackConnection)
+        let apiTestPlugin = JSAPITestPlugin()
+        let apiTestConnection = JSContextConnection(from: context, bridge: JSContextBridge(), as: apiTestPlugin.namespace)
+        apiTestPlugin.bind(to: apiTestConnection)
 
         loadContext()
 
@@ -259,5 +265,56 @@ extension CallbackTestPlugin: Plugin {
         connection.bind(callbackWithSinglePrimitiveParam, as: "callbackWithSinglePrimitiveParam")
         connection.bind(callbackWithTwoPrimitiveParams, as: "callbackWithTwoPrimitiveParams")
         connection.bind(callbackWithPrimitiveAndUddtParams, as: "callbackWithPrimitiveAndUddtParams")
+    }
+}
+
+class JSAPITestPlugin: Plugin {
+    func nullaryResolvingToInt() -> Int {
+        return 5
+    }
+
+    func nullaryResolvingToIntArray() -> [Int] {
+        return [1, 2, 3]
+    }
+
+    func nullaryResolvingToObject() -> JSAPITestStruct {
+        return JSAPITestStruct()
+    }
+
+    func unaryResolvingToVoid(param: Int) {
+        XCTAssertEqual(param, 5)
+    }
+
+    func unaryObjectResolvingToVoid(param: JSAPITestStruct) {
+        XCTAssertEqual(param, JSAPITestStruct())
+    }
+
+    func binaryResolvingToIntCallback(param: Int, completion: (Int) -> Void) {
+        XCTAssertEqual(param, 5)
+        completion(5)
+    }
+
+    func binaryResolvingToObjectCallback(param: Int, completion: (JSAPITestStruct) -> Void) {
+        XCTAssertEqual(param, 5)
+        completion(JSAPITestStruct())
+    }
+
+    var namespace: String {
+        return "jsapiTestPlugin"
+    }
+
+    func bind<C>(to connection: C) where C: Connection {
+        connection.bind(nullaryResolvingToInt, as: "nullaryResolvingToInt")
+        connection.bind(nullaryResolvingToIntArray, as: "nullaryResolvingToIntArray")
+        connection.bind(nullaryResolvingToObject, as: "nullaryResolvingToObject")
+        connection.bind(unaryResolvingToVoid, as: "unaryResolvingToVoid")
+        connection.bind(unaryObjectResolvingToVoid, as: "unaryObjectResolvingToVoid")
+        connection.bind(binaryResolvingToIntCallback, as: "binaryResolvingToIntCallback")
+        connection.bind(binaryResolvingToObjectCallback, as: "binaryResolvingToObjectCallback")
+    }
+
+    struct JSAPITestStruct: Codable, Equatable {
+        let intField = 42
+        let stringField = "JSAPITEST"
     }
 }
