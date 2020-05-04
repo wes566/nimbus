@@ -46,7 +46,7 @@ class V8ObjectEncoder(
                 )
             } else {
                 OutputNode.MapOutputNode(
-                    V8Array(v8)
+                    V8Object(v8)
                 )
             }
             StructureKind.OBJECT -> OutputNode.UndefinedOutputNode()
@@ -166,7 +166,7 @@ class V8ObjectEncoder(
         serializer: SerializationStrategy<T>,
         value: T?
     ) {
-        currentNode.deferredKey = descriptor.getElementName(index)
+        currentNode.encodeElementIndex(descriptor, index)
         encodeNullableSerializableValue(serializer, value)
     }
 
@@ -176,7 +176,7 @@ class V8ObjectEncoder(
         serializer: SerializationStrategy<T>,
         value: T
     ) {
-        currentNode.deferredKey = descriptor.getElementName(index)
+        currentNode.encodeElementIndex(descriptor, index)
         encodeSerializableValue(serializer, value)
     }
 
@@ -190,6 +190,8 @@ class V8ObjectEncoder(
 
             // notify consumer
             rootNode?.v8Object?.apply(consumer)
+        } else {
+            currentNode.reset()
         }
     }
 
@@ -199,6 +201,14 @@ class V8ObjectEncoder(
 
         open fun <T : Any> encodeValue(value: T) {
             /* leave for subclasses to override */
+        }
+
+        open fun reset() {
+            /* leave for subclasses to override */
+        }
+
+        open fun encodeElementIndex(descriptor: SerialDescriptor, index: Int) {
+            deferredKey = descriptor.getElementName(index)
         }
 
         fun encodeNull() {
@@ -246,7 +256,7 @@ class V8ObjectEncoder(
             }
         }
 
-        class MapOutputNode(v8Array: V8Array) : OutputNode(v8Array) {
+        class MapOutputNode(v8Object: V8Object) : OutputNode(v8Object) {
 
             enum class State {
                 KEY,
@@ -254,17 +264,24 @@ class V8ObjectEncoder(
             }
 
             private var state: State = State.KEY
-            private var key: String = ""
+
+            override fun reset() {
+                state = State.KEY
+            }
+
+            override fun encodeElementIndex(descriptor: SerialDescriptor, index: Int) {
+                // do nothing since we determine the key in encodeValue()
+            }
 
             override fun <T : Any> encodeValue(value: T) {
                 when (state) {
                     State.KEY -> {
-                        key =
+                        deferredKey =
                             value as? String ?: throw invalidKeyTypeEncodingException(value::class)
                         state = State.VALUE
                     }
                     State.VALUE -> {
-                        encodeNamedValue(key, value)
+                        deferredKey?.let { encodeNamedValue(it, value) }
                         state = State.KEY
                     }
                 }
