@@ -5,7 +5,7 @@
 // For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
 //
 
-package com.salesforce.nimbus.bridge.webview
+package com.salesforce.nimbus.bridge.tests.webview
 
 import android.util.Log
 import android.webkit.WebView
@@ -16,11 +16,14 @@ import com.salesforce.nimbus.BoundMethod
 import com.salesforce.nimbus.JSONEncodable
 import com.salesforce.nimbus.Plugin
 import com.salesforce.nimbus.PluginOptions
-import com.salesforce.nimbus.toJSONEncodable
+import com.salesforce.nimbus.bridge.tests.CallbackTestPlugin
+import com.salesforce.nimbus.bridge.tests.CallbackTestPluginWebViewBinder
+import com.salesforce.nimbus.bridge.tests.WebViewActivity
+import com.salesforce.nimbus.bridge.webview.WebViewBridge
+import com.salesforce.nimbus.bridge.webview.broadcastMessage
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +32,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
-class MochaTests {
+class WebViewMochaTests {
 
     data class MochaMessage(val stringField: String = "This is a string", val intField: Int = 42) : JSONEncodable {
         override fun encode(): String {
@@ -97,7 +100,11 @@ class MochaTests {
         val bridge = WebViewBridge()
 
         runOnUiThread {
-            bridge.add(CallbackTestPluginWebViewBinder(CallbackTestPlugin()))
+            bridge.add(
+                CallbackTestPluginWebViewBinder(
+                    CallbackTestPlugin()
+                )
+            )
             bridge.add(MochaTestBridgeWebViewBinder(testBridge))
             bridge.add(JSAPITestPluginWebViewBinder(jsAPITest))
             bridge.attach(webView)
@@ -119,122 +126,10 @@ class MochaTests {
 
         assertEquals(0, testBridge.failures)
     }
-
-    @Test
-    fun testExecutePromiseResolved() {
-        val webView = activityRule.activity.webView
-        val testBridge = MochaTestBridge(webView)
-
-        val bridge = WebViewBridge()
-        val callbackTestBinder = CallbackTestPluginWebViewBinder(CallbackTestPlugin())
-
-        runOnUiThread {
-            bridge.add(callbackTestBinder)
-            bridge.add(MochaTestBridgeWebViewBinder(testBridge))
-            bridge.attach(webView)
-            webView.loadUrl("file:///android_asset/test-www/index.html")
-        }
-
-        assertTrue(testBridge.readyLatch.await(5, TimeUnit.SECONDS))
-        val completionLatch = CountDownLatch(1)
-        runOnUiThread {
-            bridge.invoke(
-                "__nimbus.plugins.callbackTestPlugin.addOne",
-                args = arrayOf(5.toJSONEncodable())
-            ) { err, result ->
-                assertNull(err)
-                assertEquals(6, result)
-                completionLatch.countDown()
-            }
-        }
-
-        assertTrue(completionLatch.await(5, TimeUnit.SECONDS))
-    }
-
-    @Test
-    fun testExecutePromiseRejected() {
-        val webView = activityRule.activity.webView
-        val testBridge = MochaTestBridge(webView)
-
-        val bridge = WebViewBridge()
-        val callbackTestBinder = CallbackTestPluginWebViewBinder(CallbackTestPlugin())
-
-        runOnUiThread {
-            bridge.add(MochaTestBridgeWebViewBinder(testBridge))
-            bridge.add(callbackTestBinder)
-            bridge.attach(webView)
-            webView.loadUrl("file:///android_asset/test-www/index.html")
-        }
-
-        assertTrue(testBridge.readyLatch.await(5, TimeUnit.SECONDS))
-        val completionLatch = CountDownLatch(1)
-        runOnUiThread {
-            bridge.invoke(
-                "__nimbus.plugins.callbackTestPlugin.failWith",
-                arrayOf("epic fail".toJSONEncodable())
-            ) { err, result ->
-                assertEquals("epic fail", err)
-                assertNull(result)
-                completionLatch.countDown()
-            }
-        }
-
-        assertTrue(completionLatch.await(5, TimeUnit.SECONDS))
-    }
-
-    @Test
-    fun testPromiseRejectedOnRefresh() {
-        val webView = activityRule.activity.webView
-        val testBridge = MochaTestBridge(webView)
-
-        val bridge = WebViewBridge()
-        val callbackTestBinder = CallbackTestPluginWebViewBinder(CallbackTestPlugin())
-
-        runOnUiThread {
-            bridge.add(MochaTestBridgeWebViewBinder(testBridge))
-            bridge.add(callbackTestBinder)
-            bridge.attach(webView)
-            webView.loadUrl("file:///android_asset/test-www/index.html")
-        }
-
-        assertTrue(testBridge.readyLatch.await(5, TimeUnit.SECONDS))
-        val completionLatch = CountDownLatch(1)
-        runOnUiThread {
-            bridge.invoke(
-                "__nimbus.plugins.callbackTestPlugin.wait",
-                arrayOf(60000.toJSONEncodable())
-            ) { err, _ ->
-                assertEquals("ERROR_PAGE_UNLOADED", err)
-                completionLatch.countDown()
-            }
-        }
-
-        runOnUiThread {
-            // Destroy the existing web page & JS context
-            webView.loadUrl("file:///android_asset/test-www/index.html")
-        }
-
-        assertTrue(completionLatch.await(5, TimeUnit.SECONDS))
-    }
 }
 
-data class JSAPITestStruct(var stringField: String = "JSAPITEST", var intField: Int = 42) : JSONEncodable {
-    override fun encode(): String {
-        val jsonObject = JSONObject()
-        jsonObject.put("stringField", stringField)
-        jsonObject.put("intField", intField)
-        return jsonObject.toString()
-    }
-
-    companion object {
-        fun decode(jsonString: String): JSAPITestStruct {
-            val json = JSONObject(jsonString)
-            val intField = json.getInt("intField")
-            val stringField = json.getString("stringField")
-            return JSAPITestStruct(stringField, intField)
-        }
-    }
-}
+@Serializable
+data class JSAPITestStruct(var stringField: String = "JSAPITEST", var intField: Int = 42)
 
 @PluginOptions(name = "jsapiTestPlugin")
 class JSAPITestPlugin : Plugin {

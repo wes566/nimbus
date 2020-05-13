@@ -1,8 +1,11 @@
-package com.salesforce.nimbus.bridge.v8
+package com.salesforce.nimbus.bridge.tests.v8
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.eclipsesource.v8.V8
 import com.google.common.truth.Truth.assertThat
+import com.salesforce.nimbus.bridge.tests.withinLatch
+import com.salesforce.nimbus.bridge.v8.V8Bridge
+import com.salesforce.nimbus.bridge.v8.toV8Encodable
 import com.salesforce.k2v8.scope
 import com.salesforce.nimbus.invoke
 import kotlinx.serialization.Serializable
@@ -10,8 +13,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 /**
  * Tests the [V8Bridge.invoke] function.
@@ -76,10 +77,19 @@ class V8BridgeInvokeTests {
     fun testInvokePromiseResolvedWithObject() {
         v8.scope {
             withinLatch {
-                bridge.invoke("objectFunc", emptyArray(), SomeClass.serializer()) { error, result ->
+                bridge.invoke(
+                    "objectFunc",
+                    emptyArray(),
+                    SomeClass.serializer()
+                ) { error, result ->
                     assertThat(error).isNull()
                     assertThat(result).isNotNull()
-                    assertThat(result).isEqualTo(SomeClass("Some string", 5))
+                    assertThat(result).isEqualTo(
+                        SomeClass(
+                            "Some string",
+                            5
+                        )
+                    )
                     countDown()
                 }
             }
@@ -109,12 +119,6 @@ class V8BridgeInvokeTests {
                     countDown()
                 }
             }
-        }
-    }
-
-    private fun withinLatch(block: CountDownLatch.() -> Unit): CountDownLatch {
-        return CountDownLatch(1).apply { block(this) }.also {
-            assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
         }
     }
 }
