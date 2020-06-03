@@ -54,9 +54,25 @@ public protocol Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, CB0: Encodable>(
+        _ name: String,
+        to function: @escaping (@escaping (CB0) -> Void) throws -> R
+    )
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<CB0: Encodable, CB1: Encodable>(
         _ name: String,
         to function: @escaping (@escaping (CB0, CB1) -> Void) throws -> Void
+    )
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, CB0: Encodable, CB1: Encodable>(
+        _ name: String,
+        to function: @escaping (@escaping (CB0, CB1) -> Void) throws -> R
     )
 
     /**
@@ -86,9 +102,25 @@ public protocol Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, CB0: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, @escaping (CB0) -> Void) throws -> R
+    ) where A0: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, CB0: Encodable, CB1: Encodable>(
         _ name: String,
         to function: @escaping (A0, @escaping (CB0, CB1) -> Void) throws -> Void
+    ) where A0: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, CB0: Encodable, CB1: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, @escaping (CB0, CB1) -> Void) throws -> R
     ) where A0: Decodable
 
     /**
@@ -118,9 +150,25 @@ public protocol Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, CB0>(
+        _ name: String,
+        to function: @escaping (A0, A1, @escaping (CB0) -> Void) throws -> R
+    ) where A0: Decodable, A1: Decodable, CB0: Encodable
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, CB0, CB1>(
         _ name: String,
         to function: @escaping (A0, A1, @escaping (CB0, CB1) -> Void) throws -> Void
+    ) where A0: Decodable, A1: Decodable, CB0: Encodable, CB1: Encodable
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, CB0, CB1>(
+        _ name: String,
+        to function: @escaping (A0, A1, @escaping (CB0, CB1) -> Void) throws -> R
     ) where A0: Decodable, A1: Decodable, CB0: Encodable, CB1: Encodable
 
     /**
@@ -150,9 +198,25 @@ public protocol Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, A2, CB0: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, A1, A2, @escaping (CB0) -> Void) throws -> R
+    ) where A0: Decodable, A1: Decodable, A2: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, A2, CB0: Encodable, CB1: Encodable>(
         _ name: String,
         to function: @escaping (A0, A1, A2, @escaping (CB0, CB1) -> Void) throws -> Void
+    ) where A0: Decodable, A1: Decodable, A2: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, A2, CB0: Encodable, CB1: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, A1, A2, @escaping (CB0, CB1) -> Void) throws -> R
     ) where A0: Decodable, A1: Decodable, A2: Decodable
 
     /**
@@ -182,9 +246,25 @@ public protocol Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, A2, A3, CB0: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, A1, A2, A3, @escaping (CB0) -> Void) throws -> R
+    ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, A2, A3, CB0: Encodable, CB1: Encodable>(
         _ name: String,
         to function: @escaping (A0, A1, A2, A3, @escaping (CB0, CB1) -> Void) throws -> Void
+    ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, A2, A3, CB0: Encodable, CB1: Encodable>(
+        _ name: String,
+        to function: @escaping (A0, A1, A2, A3, @escaping (CB0, CB1) -> Void) throws -> R
     ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable
 }
 
@@ -243,8 +323,28 @@ public extension Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, CB0: Encodable>(
+        _ function: @escaping (@escaping (CB0) -> Void) throws -> R,
+        as name: String
+    ) {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<CB0: Encodable, CB1: Encodable>(
         _ function: @escaping (@escaping (CB0, CB1) -> Void) throws -> Void,
+        as name: String
+    ) {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, CB0: Encodable, CB1: Encodable>(
+        _ function: @escaping (@escaping (CB0, CB1) -> Void) throws -> R,
         as name: String
     ) {
         bind(name, to: function)
@@ -283,8 +383,28 @@ public extension Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, CB0: Encodable>(
+        _ function: @escaping (A0, @escaping (CB0) -> Void) throws -> R,
+        as name: String
+    ) where A0: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, CB0: Encodable, CB1: Encodable>(
         _ function: @escaping (A0, @escaping (CB0, CB1) -> Void) throws -> Void,
+        as name: String
+    ) where A0: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, CB0: Encodable, CB1: Encodable>(
+        _ function: @escaping (A0, @escaping (CB0, CB1) -> Void) throws -> R,
         as name: String
     ) where A0: Decodable {
         bind(name, to: function)
@@ -323,8 +443,28 @@ public extension Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, CB0>(
+        _ function: @escaping (A0, A1, @escaping (CB0) -> Void) throws -> R,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, CB0: Encodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, CB0, CB1>(
         _ function: @escaping (A0, A1, @escaping (CB0, CB1) -> Void) throws -> Void,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, CB0: Encodable, CB1: Encodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, CB0, CB1>(
+        _ function: @escaping (A0, A1, @escaping (CB0, CB1) -> Void) throws -> R,
         as name: String
     ) where A0: Decodable, A1: Decodable, CB0: Encodable, CB1: Encodable {
         bind(name, to: function)
@@ -363,8 +503,28 @@ public extension Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, A2, CB0: Encodable>(
+        _ function: @escaping (A0, A1, A2, @escaping (CB0) -> Void) throws -> R,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, A2: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, A2, CB0: Encodable, CB1: Encodable>(
         _ function: @escaping (A0, A1, A2, @escaping (CB0, CB1) -> Void) throws -> Void,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, A2: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, A2, CB0: Encodable, CB1: Encodable>(
+        _ function: @escaping (A0, A1, A2, @escaping (CB0, CB1) -> Void) throws -> R,
         as name: String
     ) where A0: Decodable, A1: Decodable, A2: Decodable {
         bind(name, to: function)
@@ -403,8 +563,28 @@ public extension Binder {
     /**
      Bind the specified function to this connection.
      */
+    func bind<R: Encodable, A0, A1, A2, A3, CB0: Encodable>(
+        _ function: @escaping (A0, A1, A2, A3, @escaping (CB0) -> Void) throws -> R,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
     func bind<A0, A1, A2, A3, CB0: Encodable, CB1: Encodable>(
         _ function: @escaping (A0, A1, A2, A3, @escaping (CB0, CB1) -> Void) throws -> Void,
+        as name: String
+    ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable {
+        bind(name, to: function)
+    }
+
+    /**
+     Bind the specified function to this connection.
+     */
+    func bind<R: Encodable, A0, A1, A2, A3, CB0: Encodable, CB1: Encodable>(
+        _ function: @escaping (A0, A1, A2, A3, @escaping (CB0, CB1) -> Void) throws -> R,
         as name: String
     ) where A0: Decodable, A1: Decodable, A2: Decodable, A3: Decodable {
         bind(name, to: function)
