@@ -151,7 +151,6 @@ class V8BinderGenerator : BinderGenerator() {
         kotlinFunction: KmFunction?
     ): FunSpec {
         val functionName = functionElement.simpleName.toString()
-        val functionReturnType = functionElement.returnType
 
         // create the binder function
         val parameters = "parameters"
@@ -201,15 +200,6 @@ class V8BinderGenerator : BinderGenerator() {
                                     error(
                                         functionElement,
                                         "Only a Unit (Void) return type in callbacks is supported."
-                                    )
-                                    return@forEachIndexed
-                                }
-
-                                // throw a compiler error if the function does not return void
-                                !functionReturnType.isUnitType() -> {
-                                    error(
-                                        functionElement,
-                                        "Functions with a callback only support a Unit (Void) return type."
                                     )
                                     return@forEachIndexed
                                 }
