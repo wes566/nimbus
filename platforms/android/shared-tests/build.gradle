@@ -1,20 +1,16 @@
-import groovy.json.JsonSlurper
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlinx-serialization'
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+    id("kotlin-kapt")
+    id("kotlinx-serialization")
+}
 
 android {
-    compileSdkVersion 29
-
-    def versionFile = file('../../../lerna.json')
-    def parsedVersion = new JsonSlurper().parseText(versionFile.text)
-    project.version = parsedVersion.version.toString()
+    compileSdkVersion ProjectVersions.androidSdk
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdkVersion ProjectVersions.minSdk
+        targetSdkVersion ProjectVersions.androidSdk
         versionCode 1
         versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -23,7 +19,6 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             testCoverageEnabled false
         }
         debug {
@@ -33,42 +28,60 @@ android {
 
     sourceSets {
         androidTest {
-            assets.srcDirs += ['../../../packages/test-www/dist', '../../../packages/nimbus-bridge/dist/iife']
+            assets.srcDirs += ["../../../packages/test-www/dist", "../../../packages/nimbus-bridge/dist/iife"]
         }
     }
 
     testOptions {
-        unitTests.returnDefaultValues = true
+        unitTests {
+            returnDefaultValues = true
+            all {
+                useJUnitPlatform()
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    packagingOptions {
+        pickFirst("META-INF/LICENSE*")
+        pickFirst("META-INF/DEPENDENCIES")
     }
 
 }
 
 dependencies {
-    androidTestImplementation project(":annotations")
-    androidTestImplementation "com.salesforce.k2v8:k2v8:$k2v8_version"
-    androidTestImplementation project(":bridge-v8")
-    androidTestImplementation project(":bridge-webview")
-    androidTestImplementation "com.eclipsesource.j2v8:j2v8:$j2v8_version"
-    androidTestImplementation "com.google.guava:guava:29.0-android"
-    kaptAndroidTest project(":compiler-webview")
-    kaptAndroidTest project(":compiler-v8")
-
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
-    androidTestImplementation "androidx.test.ext:junit:$androidx_test_version"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
-    androidTestImplementation "androidx.test:rules:$androidx_test_version", {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    }
-    androidTestImplementation "com.google.truth:truth:$google_truth_version"
-    androidTestImplementation "io.kotlintest:kotlintest-runner-junit4:$kotlin_test_runner_version"
+    androidTestImplementation project(":modules:annotations")
+    androidTestImplementation project(":modules:bridge-v8")
+    androidTestImplementation project(":modules:bridge-webview")
+    androidTestImplementation project(":modules:core")
+    kaptAndroidTest project(":modules:compiler-webview")
+    kaptAndroidTest project(":modules:compiler-v8")
+    androidTestImplementation(Libs.androidxTestRules, {
+        exclude group: "com.android.support", module: "support-annotations"
+    })
+    androidTestImplementation(Libs.espressoCore)
+    androidTestImplementation(Libs.guava)
+    androidTestImplementation(Libs.j2v8)
+    androidTestImplementation(Libs.junit)
+    androidTestImplementation(Libs.k2v8)
+    androidTestImplementation(Libs.kotlinxSerializationRuntime)
+    androidTestImplementation(Libs.truth)
 }
 
 /*
  * Compile the test web app prior to assembling the androidTest app
  */
 task buildTestWebApp(type: Exec) {
-    workingDir '../../..'
-    commandLine 'npm', 'install'
+    workingDir "../../.."
+    commandLine "npm", "install"
 }
 
 tasks.whenTaskAdded { task ->
@@ -77,4 +90,4 @@ tasks.whenTaskAdded { task ->
     }
 }
 
-apply from: rootProject.file('gradle/lint.gradle')
+apply from: rootProject.file("gradle/lint.gradle")
