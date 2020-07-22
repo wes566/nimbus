@@ -23,5 +23,3 @@ dependencies {
     implementation(Libs.kotlinStdlib)
     compileOnly(Libs.kotlinxSerializationRuntime)
 }
-
-apply(from = rootProject.file("gradle/lint.gradle"))

@@ -19,7 +19,10 @@ dependencies {
     implementation(Libs.kotlinxSerializationRuntime)
 }
 
-apply(from = rootProject.file("gradle/java-publishing-tasks.gradle"))
+configure<JavaPluginExtension> {
+    withSourcesJar()
+    withJavadocJar()
+}
 
 afterEvaluate {
     publishing {
@@ -29,5 +32,3 @@ afterEvaluate {
         setupPublicationsUpload(project, publishing)
     }
 }
-
-apply(from = rootProject.file("gradle/lint.gradle"))

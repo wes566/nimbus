@@ -26,21 +26,24 @@ dependencies {
     testImplementation(Libs.junit)
     testImplementation(Libs.json)
     testImplementation(Libs.kotlinxSerializationRuntime)
-
 }
 
 addTestDependencies()
 
-apply(from= rootProject.file("gradle/android-publishing-tasks.gradle"))
+val sourcesJar by tasks.creating(Jar::class) {
+    archiveClassifier.set("sources")
+    from(android.sourceSets.getByName("main").java.srcDirs)
+}
 
 afterEvaluate {
     publishing {
         setupAllPublications(project)
+        publications.getByName<MavenPublication>("mavenPublication") {
+            artifact(sourcesJar)
+        }
     }
 
     bintray {
         setupPublicationsUpload(project, publishing)
     }
 }
-
-apply(from = rootProject.file("gradle/lint.gradle"))

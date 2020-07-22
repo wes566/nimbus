@@ -63,8 +63,6 @@ object Libs {
 
     const val constraintLayout: String = "androidx.constraintlayout:constraintlayout:" + Versions.constraintLayout
 
-    const val ktlint: String = "com.pinterest:ktlint:" + Versions.ktlint
-
     const val guava: String = "com.google.guava:guava:" + Versions.guava
 
     const val junit: String = "androidx.test.ext:junit:" + Versions.junit
