@@ -11,19 +11,19 @@ import org.gradle.api.GradleException
 
 plugins {
     id("com.jfrog.artifactory")
-    id("maven-publish")
-    id("com.vanniktech.android.junit.jacoco") version "0.16.0"
+    `maven-publish`
     id("org.jetbrains.dokka") version Versions.dokkaGradlePlugin
+    id("com.vanniktech.android.junit.jacoco") version Versions.jacocoAndroid
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktlintGradle
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.3.70"
+    id("org.jetbrains.kotlin.plugin.serialization") version Versions.kotlin
 }
 
 allprojects {
     repositories {
         google()
         jcenter()
-        maven("https://dl.bintray.com/salesforce-mobile/android")
     }
+
     group = getSettingValue(PublishingSettingsKey.group) ?: ""
     val versionFile = file("$rootDir/../../lerna.json")
     val parsedFile = org.json.JSONObject(versionFile.readText())
@@ -47,6 +47,9 @@ allprojects {
 
 junitJacoco {
     jacocoVersion = Versions.jacoco
+    setIgnoreProjects("demo-app")
+    includeNoLocationClasses = true
+    includeInstrumentationCoverageInMergedReport = true
 }
 
 tasks.register("clean", Delete::class) {
@@ -98,9 +101,11 @@ artifactory {
 }
 
 subprojects {
-    apply(plugin = "org.jlleitschuh.gradle.ktlint") // Version should be inherited from parent
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     ktlint {
         version.set(Versions.ktlint)
     }
 }
+
+apply(from = rootProject.file("gradle/test-output.gradle.kts"))
