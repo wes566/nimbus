@@ -6,7 +6,7 @@
 // root or https://opensource.org/licenses/BSD-3-Clause
 //
 
-// swiftlint:disable type_body_length
+// swiftlint:disable type_body_length file_length
 
 import JavaScriptCore
 import XCTest
@@ -341,6 +341,331 @@ class JSValueEncoderTests: XCTestCase {
         """
         XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
     }
+
+    func testKeyedContainerTypes() throws { // swiftlint:disable:this function_body_length
+        let test = KeyedContainerTypesStruct()
+        let encoded = try encoder.encode(test, context: context)
+        XCTAssertTrue(encoded.isObject)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest.boolType !== true) {
+                return false;
+            }
+            if (valueToTest.stringType !== "test") {
+                return false;
+            }
+            if (valueToTest.doubleType !== 2.0) {
+                return false;
+            }
+            if (valueToTest.floatType !== 3.0) {
+                return false;
+            }
+            if (valueToTest.intType !== 4) {
+                return false;
+            }
+            if (valueToTest.intEightType !== 5) {
+                return false;
+            }
+            if (valueToTest.intSixteenType !== 6) {
+                return false;
+            }
+            if (valueToTest.intThirtyTwoType !== 7) {
+                return false;
+            }
+            if (valueToTest.intSixtyFourType !== 8) {
+                return false;
+            }
+            if (valueToTest.uintType !== 9) {
+                return false;
+            }
+            if (valueToTest.uintEightType !== 10) {
+                return false;
+            }
+            if (valueToTest.uintSixteenType !== 11) {
+                return false;
+            }
+            if (valueToTest.uintThirtyTwoType !== 12) {
+                return false;
+            }
+            if (valueToTest.uintSixtyFourType !== 13) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testUnkeyedContainerTypes() throws { // swiftlint:disable:this function_body_length
+        let container = JSValueEncoderContainer(context: context)
+        let storage = JSValue(newArrayIn: context)
+        let unkeyed = JSValueUnkeyedEncodingContainer(
+            encoder: container,
+            container: storage,
+            codingPath: []
+        )
+        XCTAssertEqual(storage?.length(), 0)
+        try unkeyed.encode("test")
+        XCTAssertEqual(storage?.length(), 1)
+        XCTAssertEqual(storage?.atIndex(0)?.toString(), "test")
+
+        try unkeyed.encode(2.2 as Double)
+        XCTAssertEqual(storage?.length(), 2)
+        XCTAssertEqual(storage!.atIndex(1)!.toDouble(), 2.2 as Double, accuracy: 0.01)
+
+        try unkeyed.encode(3.3 as Float)
+        XCTAssertEqual(storage?.length(), 3)
+        XCTAssertEqual(storage!.atIndex(2)!.toDouble(), 3.3 as Double, accuracy: 0.01)
+
+        try unkeyed.encode(4 as Int)
+        XCTAssertEqual(storage?.length(), 4)
+        XCTAssertEqual(storage?.atIndex(3)?.toInt32(), 4)
+
+        try unkeyed.encode(5 as Int8)
+        XCTAssertEqual(storage?.length(), 5)
+        XCTAssertEqual(storage?.atIndex(4)?.toInt32(), 5)
+
+        try unkeyed.encode(6 as Int16)
+        XCTAssertEqual(storage?.length(), 6)
+        XCTAssertEqual(storage?.atIndex(5)?.toInt32(), 6)
+
+        try unkeyed.encode(7 as Int32)
+        XCTAssertEqual(storage?.length(), 7)
+        XCTAssertEqual(storage?.atIndex(6)?.toInt32(), 7)
+
+        try unkeyed.encode(8 as Int64)
+        XCTAssertEqual(storage?.length(), 8)
+        XCTAssertEqual(storage?.atIndex(7)?.toInt32(), 8)
+
+        try unkeyed.encode(9 as UInt)
+        XCTAssertEqual(storage?.length(), 9)
+        XCTAssertEqual(storage?.atIndex(8)?.toInt32(), 9)
+
+        try unkeyed.encode(10 as UInt8)
+        XCTAssertEqual(storage?.length(), 10)
+        XCTAssertEqual(storage?.atIndex(9)?.toInt32(), 10)
+
+        try unkeyed.encode(11 as UInt16)
+        XCTAssertEqual(storage?.length(), 11)
+        XCTAssertEqual(storage?.atIndex(10)?.toInt32(), 11)
+
+        try unkeyed.encode(12 as UInt32)
+        XCTAssertEqual(storage?.length(), 12)
+        XCTAssertEqual(storage?.atIndex(11)?.toInt32(), 12)
+
+        try unkeyed.encode(13 as UInt64)
+        XCTAssertEqual(storage?.length(), 13)
+        XCTAssertEqual(storage?.atIndex(12)?.toInt32(), 13)
+
+        try unkeyed.encode(true)
+        XCTAssertEqual(storage?.length(), 14)
+        XCTAssertEqual(storage?.atIndex(13)?.toBool(), true)
+
+        let testNil: String? = nil
+        try unkeyed.encode(testNil)
+        XCTAssertEqual(storage?.length(), 15)
+        XCTAssertEqual(storage?.atIndex(14)?.isNull, true)
+    }
+
+    func testSingleValueBool() throws {
+        let testValue: Bool = true
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isBoolean)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== true) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueFloat() throws {
+        let testValue: Float = 3.3
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (Math.abs(valueToTest - 3.3) > 0.01) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueInt8() throws {
+        let testValue: Int8 = 9
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 9) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueInt16() throws {
+        let testValue: Int16 = 10
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 10) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueInt32() throws {
+        let testValue: Int32 = 11
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 11) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueInt64() throws {
+        let testValue: Int64 = 12
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 12) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueUInt() throws {
+        let testValue: UInt = 13
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 13) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueUInt8() throws {
+        let testValue: UInt8 = 14
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 14) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueUInt16() throws {
+        let testValue: UInt16 = 15
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 15) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueUInt32() throws {
+        let testValue: UInt32 = 16
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 16) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+
+    func testSingleValueUInt64() throws {
+        let testValue: UInt64 = 17
+        let encoded = try encoder.encode(testValue, context: context)
+        XCTAssertTrue(encoded.isNumber)
+        let assertScript = """
+        function testValue() {
+            if (valueToTest !== 17) {
+                return false;
+            }
+            return true;
+        }
+        testValue();
+        """
+        XCTAssertTrue(executeAssertionScript(assertScript, testValue: encoded, key: "valueToTest"))
+    }
+}
+
+extension JSValue {
+    func length() -> Int32 {
+        return objectForKeyedSubscript("length")?.toInt32() ?? 0 as Int32
+    }
+}
+
+struct KeyedContainerTypesStruct: Encodable {
+    let boolType = true
+    let stringType = "test"
+    let doubleType: Double = 2.0
+    let floatType: Float = 3.0
+    let intType: Int = 4
+    let intEightType: Int8 = 5
+    let intSixteenType: Int16 = 6
+    let intThirtyTwoType: Int32 = 7
+    let intSixtyFourType: Int64 = 8
+    let uintType: UInt = 9
+    let uintEightType: UInt8 = 10
+    let uintSixteenType: UInt16 = 11
+    let uintThirtyTwoType: UInt32 = 12
+    let uintSixtyFourType: UInt64 = 13
 }
 
 enum TestEncodableValue: Encodable {
