@@ -36,7 +36,7 @@ object Versions {
 
     const val espressoCore: String = "3.2.0"
 
-    const val kotlinpoet: String = "1.6.0"
+    const val kotlinpoet: String = "1.5.0"
 
     const val appcompat: String = "1.1.0"
 
@@ -56,6 +56,5 @@ object Versions {
 
     const val json: String = "20190722"
 
-    const val k2v8: String = "0.0.2"
+    const val k2v8: String = "0.0.3"
 }
-
