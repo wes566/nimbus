@@ -20,11 +20,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
 
 private const val BRIDGE_NAME = "_nimbus"
 
 @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
-class WebViewBridge : Bridge<WebView, String>,
+class WebViewBridge(private val executorService: ExecutorService) : Bridge<WebView, String>,
     Runtime<WebView, String> {
 
     private var bridgeWebView: WebView? = null
@@ -51,6 +52,8 @@ class WebViewBridge : Bridge<WebView, String>,
     override fun getJavascriptEngine(): WebView? {
         return bridgeWebView
     }
+
+    override fun getExecutorService(): ExecutorService = executorService
 
     private fun invokeInternal(
         identifierSegments: Array<String>,
@@ -151,7 +154,8 @@ class WebViewBridge : Bridge<WebView, String>,
         if (!javascriptEngine.settings.javaScriptEnabled) {
             javascriptEngine.settings.javaScriptEnabled = true
         }
-        javascriptEngine.addJavascriptInterface(this,
+        javascriptEngine.addJavascriptInterface(
+            this,
             BRIDGE_NAME
         )
         initialize(javascriptEngine, binders)
@@ -196,8 +200,8 @@ class WebViewBridge : Bridge<WebView, String>,
      * Builder class to create instances of [WebViewBridge] and attach to a [WebView].
      */
     class Builder : Bridge.Builder<WebView, String, WebViewBridge>() {
-        override fun attach(javascriptEngine: WebView): WebViewBridge {
-            return WebViewBridge().apply {
+        override fun attach(executorService: ExecutorService, javascriptEngine: WebView): WebViewBridge {
+            return WebViewBridge(executorService).apply {
                 binders.addAll(builderBinders)
                 attachInternal(javascriptEngine)
             }

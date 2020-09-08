@@ -7,7 +7,7 @@
 
 package com.salesforce.nimbusdemoapp
 
-import android.content.Context
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
@@ -29,7 +29,7 @@ import com.salesforce.nimbus.bridge.webview.WebViewBridge
 import com.salesforce.nimbus.bridge.webview.bridge
 import com.salesforce.nimbus.core.plugins.DeviceInfoPlugin
 import kotlinx.serialization.Serializable
-import java.lang.RuntimeException
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -66,11 +66,12 @@ class MainActivity : AppCompatActivity() {
         // load the demo url
         webView.loadUrl("http://10.0.2.2:3000")
 
+        val executorService = Executors.newSingleThreadExecutor()
         // create a v8 runtime
-        v8 = V8.createV8Runtime()
+        v8 = executorService.submit<V8> { V8.createV8Runtime() }.get()
 
         // create the v8 bridge
-        v8Bridge = v8.bridge {
+        v8Bridge = v8.bridge(executorService) {
             bind { deviceInfoPlugin.v8Binder() }
             bind { logPlugin.v8Binder() }
             bind { toastPlugin.v8Binder() }
@@ -79,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // execute a script to get the device info plugin and then log to the console
-        v8.executeScript(
+        v8Bridge.executeScriptOnExecutor(
             """
                 __nimbus.plugins.DeviceInfoPlugin.getDeviceInfo().then((deviceInfo) => {
                     let json = JSON.stringify(deviceInfo);
@@ -136,7 +137,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         webViewBridge.detach()
         v8Bridge.detach()
-        v8.close()
     }
 }
 
@@ -150,11 +150,11 @@ class LogPlugin : Plugin {
 }
 
 @PluginOptions("ToastPlugin")
-class ToastPlugin(private val context: Context) : Plugin {
+class ToastPlugin(private val context: Activity) : Plugin {
 
     @BoundMethod
     fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        context.runOnUiThread { Toast.makeText(context, message, Toast.LENGTH_LONG).show() }
     }
 }
 
