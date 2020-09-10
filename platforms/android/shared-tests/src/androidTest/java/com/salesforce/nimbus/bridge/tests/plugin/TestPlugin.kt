@@ -398,4 +398,21 @@ class TestPlugin : Plugin, EventPublisher<StructEvent> by DefaultEventPublisher(
         callback(param0 - 1)
         return param0 - 2
     }
+
+    @BoundMethod
+    fun takesString(stringParam: String): String {
+        return stringParam
+    }
+
+    @BoundMethod
+    fun takesNumber(numberParam: Double) {}
+
+    @BoundMethod
+    fun takesBool(boolParam: Boolean) {}
+
+    @BoundMethod
+    fun takesDictionary(dictionaryParam: Map<String, String>) {}
+
+    @BoundMethod
+    fun takesTestStruct(testStructParam: TestStruct) {}
 }
