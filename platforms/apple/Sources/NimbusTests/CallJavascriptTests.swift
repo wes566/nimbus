@@ -66,6 +66,25 @@ class CallJavascriptTests: XCTestCase, WKNavigationDelegate {
         XCTAssertTrue(returnValue)
     }
 
+    func testCallMethodWithoutReturn() throws {
+        loadWebViewAndWait()
+
+        let setup = expectation(description: "setup")
+        webView.evaluateJavaScript("function testFunction() {}") { _, _ in
+            setup.fulfill()
+        }
+        wait(for: [setup], timeout: 10)
+
+        let expect = expectation(description: "js result")
+        var error: Error?
+        bridge!.evaluate("testFunction", with: []) { theError in
+            error = theError
+            expect.fulfill()
+        }
+        wait(for: [expect], timeout: 5)
+        XCTAssertNil(error)
+    }
+
     func testCallNonExistingMethodReturnsAnError() {
         loadWebViewAndWait()
 
@@ -162,6 +181,17 @@ class CallJSContextTests: XCTestCase {
         XCTAssertEqual(resultValue, true)
     }
 
+    func testCallFunctionWithoutReturn() throws {
+        let expect = expectation(description: "test call function without return")
+        var error: Error?
+        bridge!.evaluate("testFunctionWithoutReturn", with: []) { theError in
+            error = theError
+            expect.fulfill()
+        }
+        wait(for: [expect], timeout: 5)
+        XCTAssertNil(error)
+    }
+
     func testCallNonExistentFunction() throws {
         let expect = expectation(description: "non existent function")
         var result: JSValue?
@@ -210,6 +240,7 @@ class CallJSContextTests: XCTestCase {
 
     let fixtureScript = """
     function testFunction() { return true; };
+    function testFunctionWithoutReturn() {};
     function testFunctionWithArgs(...args) {
       return Array.prototype.slice.apply(args);
     };

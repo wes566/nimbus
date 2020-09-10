@@ -120,6 +120,21 @@ public class WebViewBridge: NSObject, JSEvaluating {
         invoke(identifierSegments, with: args, callback: callback)
     }
 
+    /**
+     Overloaded version of evaluate that is used to call a Javascript function that doesn't have a return value.
+     */
+    public func evaluate(
+        _ identifierPath: String,
+        with args: [Encodable],
+        callback: @escaping (Error?) -> Void
+    ) {
+        let identifierSegments = identifierPath.split(separator: ".").map(String.init)
+        let myCallback = { (error: Error?, _: Void?) in
+            callback(error)
+        }
+        invoke(identifierSegments, with: args, callback: myCallback)
+    }
+
     private let promisesQueue = DispatchQueue(label: "Nimbus.promisesQueue")
     typealias PromiseCallback = (Error?, Any?) -> Void
     private var promises: [String: PromiseCallback] = [:]
