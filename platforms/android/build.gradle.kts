@@ -10,7 +10,6 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import org.gradle.api.GradleException
 
 plugins {
-    id("com.jfrog.artifactory")
     `maven-publish`
     id("org.jetbrains.dokka") version Versions.dokkaGradlePlugin
     id("com.vanniktech.android.junit.jacoco") version Versions.jacocoAndroid
@@ -67,37 +66,8 @@ tasks {
     }
 }
 
-tasks.register("publishSnapshot") {
-    val publishTask = tasks.findByPath("artifactoryPublish")
-
-    if (publishTask != null) {
-        publishTask.dependsOn(getTasksByName("build", true))
-        this.finalizedBy(publishTask)
-    } else {
-        throw GradleException("Unable to find the publish task")
-    }
-}
-
-artifactory {
-    setContextUrl("http://oss.jfrog.org")
-    publish(
-        delegateClosureOf<org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig> {
-            repository(
-                delegateClosureOf<groovy.lang.GroovyObject> {
-                    val targetRepoKey = "oss-${buildTagFor(project.version as String)}-local"
-                    setProperty("repoKey", targetRepoKey)
-                    setProperty("username", System.getenv("BINTRAY_USER"))
-                    setProperty("password", System.getenv("BINTRAY_API_KEY"))
-                    setProperty("maven", true)
-                }
-            )
-            defaults(
-                delegateClosureOf<groovy.lang.GroovyObject> {
-                    invokeMethod("publications", "mavenPublication")
-                }
-            )
-        }
-    )
+val publishSnapshot = tasks.register("publishSnapshot") {
+    dependsOn(getTasksByName("build", true))
 }
 
 subprojects {
@@ -105,6 +75,21 @@ subprojects {
 
     ktlint {
         version.set(Versions.ktlint)
+    }
+    if (path.contains("modules")) {
+        tasks.register("publishSnapshot")
+
+        tasks.withType<PublishToMavenRepository>().configureEach {
+            doLast {
+                logger.lifecycle("Successfully uploaded ${publication.groupId}:${publication.artifactId}:${publication.version} to ${repository.name}")
+            }
+        }
+
+        tasks.withType<PublishToMavenLocal>().configureEach {
+            doLast {
+                logger.lifecycle("Successfully uploaded ${publication.groupId}:${publication.artifactId}:${publication.version} to MavenLocal.")
+            }
+        }
     }
 }
 
