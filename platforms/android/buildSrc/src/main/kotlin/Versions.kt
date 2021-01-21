@@ -8,9 +8,9 @@
 import kotlin.String
 
 object Versions {
-    const val kotlinxSerialization: String = "0.20.0"
+    const val kotlinxSerialization: String = "1.0.1"
 
-    const val kotlin: String = "1.3.72"
+    const val kotlin: String = "1.4.21"
 
     const val jacocoAndroid: String = "0.16.0"
 
@@ -20,7 +20,7 @@ object Versions {
 
     const val mockk: String = "1.10.2"
 
-    const val androidToolsBuildGradle: String = "4.0.1"
+    const val androidToolsBuildGradle: String = "4.1.0"
 
     const val androidxTestRules: String = "1.1.1" // available: "1.2.0"
 
@@ -56,5 +56,5 @@ object Versions {
 
     const val json: String = "20190722"
 
-    const val k2v8: String = "0.0.3"
+    const val k2v8: String = "1.0.0"
 }
