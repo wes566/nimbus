@@ -16,7 +16,7 @@ object Versions {
 
     const val jacoco: String = "0.8.4"
 
-    const val kotest: String = "4.1.1"
+    const val kotest: String = "4.3.2"
 
     const val mockk: String = "1.10.2"
 
@@ -44,7 +44,7 @@ object Versions {
 
     const val nodeGradle: String = "2.2.4"
 
-    const val ktlint: String = "0.36.0"
+    const val ktlint: String = "0.40.0"
 
     const val guava: String = "29.0-android"
 
